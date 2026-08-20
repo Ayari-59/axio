@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink-50: #f6f7f9;
+  --color-ink-100: #eceef2;
+  --color-ink-200: #d5dae2;
+  --color-ink-300: #b0b9c7;
+  --color-ink-400: #7d8899;
+  --color-ink-500: #5b6678;
+  --color-ink-600: #454f5f;
+  --color-ink-700: #363e4b;
+  --color-ink-800: #232a34;
+  --color-ink-900: #161b22;
+  --color-ink-950: #0d1117;
+
+  --color-brand-50: #eef4ff;
+  --color-brand-100: #dbe6ff;
+  --color-brand-200: #bed2ff;
+  --color-brand-300: #92b3ff;
+  --color-brand-400: #5f88fb;
+  --color-brand-500: #3a63f0;
+  --color-brand-600: #2547d6;
+  --color-brand-700: #1e37ab;
+  --color-brand-800: #1d3187;
+  --color-brand-900: #1d2d6b;
+
+  --color-good-500: #12855f;
+  --color-good-100: #d8f2e6;
+  --color-warn-500: #b5731a;
+  --color-warn-100: #fbeed6;
+  --color-bad-500: #c02b3a;
+  --color-bad-100: #fbe0e2;
+}
+
+:root {
+  --surface: #ffffff;
+  --surface-muted: #f6f7f9;
+  --border: #e3e7ee;
+  --text: #161b22;
+  --text-muted: #5b6678;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #161b22;
+    --surface-muted: #0d1117;
+    --border: #2a323d;
+    --text: #eceef2;
+    --text-muted: #9aa5b5;
+    color-scheme: dark;
+  }
+}
+
+html,
+body {
+  background: var(--surface-muted);
+  color: var(--text);
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.muted {
+  color: var(--text-muted);
+}
+
+.divide-border > * + * {
+  border-top: 1px solid var(--border);
+}
+
+input,
+select,
+textarea {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 1px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  width: auto;
+  accent-color: var(--color-brand-500);
+}
+
+input[type="range"] {
+  padding: 0;
+  border: none;
+  background: transparent;
+  accent-color: var(--color-brand-500);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.scroll-x {
+  overflow-x: auto;
+}

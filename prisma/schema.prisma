@@ -1,0 +1,464 @@
+// Axio — schéma portable (SQLite en dev, PostgreSQL en production).
+// Contraintes de portabilité assumées (cf. docs/04-schema-base-de-donnees.md) :
+//  - aucun enum Prisma  → String + unions TypeScript validées par Zod
+//  - aucun type Json    → String contenant du JSON, validé par Zod à la lecture
+//  - aucun tableau natif
+//  - Float en dev       → Decimal(18,4) en production
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  plan      String   @default("free")
+  createdAt DateTime @default(now())
+
+  companies   Company[]
+  memberships Membership[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  locale       String   @default("fr-FR")
+  createdAt    DateTime @default(now())
+
+  memberships Membership[]
+}
+
+model Membership {
+  id             String  @id @default(cuid())
+  userId         String
+  organizationId String
+  companyId      String?
+  role           String  @default("ADMIN")
+  scope          String? // JSON : { dimensionCode, memberCodes[] }
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  company      Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId, companyId])
+  @@index([organizationId])
+}
+
+model Company {
+  id                   String    @id @default(cuid())
+  organizationId       String
+  name                 String
+  slug                 String
+  industry             String    @default("other")
+  activity             String    @default("")
+  country              String    @default("FR")
+  currency             String    @default("EUR")
+  fiscalYearStartMonth Int       @default(1)
+  configuredAt         DateTime?
+  archivedAt           DateTime?
+  createdAt            DateTime  @default(now())
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  profile      BusinessModelProfile?
+
+  memberships    Membership[]
+  configurations ConfigurationVersion[]
+  dimensions     Dimension[]
+  members        DimensionMember[]
+  accounts       Account[]
+  periods        Period[]
+  entries        Entry[]
+  drivers        DriverValue[]
+  rules          AllocationRule[]
+  budgets        Budget[]
+  kpis           KpiDefinition[]
+  runs           CalculationRun[]
+  scenarios      Scenario[]
+  alerts         Alert[]
+  imports        ImportBatch[]
+  reports        Report[]
+  auditLogs      AuditLog[]
+
+  @@unique([organizationId, slug])
+}
+
+model BusinessModelProfile {
+  companyId String   @id
+  payload   String // JSON validé par businessModelProfileSchema
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ConfigurationVersion {
+  id        String   @id @default(cuid())
+  companyId String
+  version   Int
+  payload   String // JSON : capacités, dimensions, KPI, cockpit, trace des règles
+  note      String   @default("")
+  createdBy String?
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, version])
+}
+
+model Dimension {
+  id           String  @id @default(cuid())
+  companyId    String
+  code         String
+  label        String
+  kind         String  @default("ANALYSIS")
+  isCostObject Boolean @default(false)
+  isMandatory  Boolean @default(false)
+  hierarchical Boolean @default(false)
+  sortOrder    Int     @default(100)
+  source       String  @default("system")
+  active       Boolean @default(true)
+
+  company Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  members DimensionMember[]
+  links   EntryDimension[]
+
+  @@unique([companyId, code])
+}
+
+model DimensionMember {
+  id          String  @id @default(cuid())
+  companyId   String
+  dimensionId String
+  code        String
+  label       String
+  parentId    String?
+  attributes  String  @default("{}") // JSON libre : m2, budgetTotal, dailyRate…
+  active      Boolean @default(true)
+
+  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  dimension Dimension         @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  parent    DimensionMember?  @relation("MemberHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children  DimensionMember[] @relation("MemberHierarchy")
+  links     EntryDimension[]
+  drivers   DriverValue[]
+
+  @@unique([dimensionId, code])
+  @@index([companyId])
+  @@index([parentId])
+}
+
+model Account {
+  id                  String  @id @default(cuid())
+  companyId           String
+  number              String
+  label               String
+  type                String  @default("EXPENSE")
+  defaultNatureCode   String?
+  defaultBehavior     String  @default("VARIABLE")
+  defaultTraceability String  @default("INDIRECT")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entries Entry[]
+
+  @@unique([companyId, number])
+}
+
+model Period {
+  id         String   @id @default(cuid())
+  companyId  String
+  code       String
+  start      DateTime
+  end        DateTime
+  type       String   @default("MONTH")
+  status     String   @default("OPEN")
+  fiscalYear Int
+
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entries     Entry[]
+  drivers     DriverValue[]
+  budgetLines BudgetLine[]
+  kpiValues   KpiValue[]
+
+  @@unique([companyId, code])
+  @@index([companyId, fiscalYear])
+}
+
+model Entry {
+  id            String   @id @default(cuid())
+  companyId     String
+  periodId      String
+  date          DateTime
+  kind          String // REVENUE | COST | QUANTITY | CASH_IN | CASH_OUT
+  amount        Float
+  quantity      Float?
+  unitPrice     Float?
+  unit          String?
+  accountId     String?
+  behavior      String   @default("VARIABLE")
+  traceability  String   @default("INDIRECT")
+  label         String   @default("")
+  sourceRef     String?
+  importBatchId String?
+  createdAt     DateTime @default(now())
+
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  period      Period           @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  account     Account?         @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  importBatch ImportBatch?     @relation(fields: [importBatchId], references: [id], onDelete: SetNull)
+  dimensions  EntryDimension[]
+
+  @@index([companyId, periodId, kind])
+  @@index([importBatchId])
+}
+
+model EntryDimension {
+  id          String @id @default(cuid())
+  entryId     String
+  dimensionId String
+  memberId    String
+
+  entry     Entry           @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  dimension Dimension       @relation(fields: [dimensionId], references: [id], onDelete: Cascade)
+  member    DimensionMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, dimensionId])
+  @@index([memberId])
+  @@index([dimensionId, memberId])
+}
+
+model DriverValue {
+  id          String  @id @default(cuid())
+  companyId   String
+  periodId    String
+  driverCode  String
+  dimensionId String?
+  memberId    String?
+  value       Float
+  unit        String  @default("")
+
+  company Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  period  Period           @relation(fields: [periodId], references: [id], onDelete: Cascade)
+  member  DimensionMember? @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, periodId, driverCode])
+}
+
+model AllocationRule {
+  id         String  @id @default(cuid())
+  companyId  String
+  name       String
+  stage      Int     @default(1)
+  sortOrder  Int     @default(100)
+  active     Boolean @default(true)
+  suggested  Boolean @default(false)
+  definition String // JSON : source, method, target, driver, weights
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, stage, sortOrder])
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  companyId  String
+  name       String
+  fiscalYear Int
+  kind       String   @default("BUDGET")
+  scenario   String   @default("BASE")
+  version    Int      @default(1)
+  status     String   @default("DRAFT")
+  createdAt  DateTime @default(now())
+
+  company Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  lines   BudgetLine[]
+
+  @@index([companyId, fiscalYear, kind])
+}
+
+model BudgetLine {
+  id         String  @id @default(cuid())
+  budgetId   String
+  periodId   String
+  kind       String // REVENUE | COST
+  accountId  String?
+  natureCode String?
+  behavior   String  @default("VARIABLE")
+  dimensions String  @default("{}") // JSON : { PROJECT: "ALBA" }
+  quantity   Float?
+  unitPrice  Float?
+  amount     Float
+  label      String  @default("")
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  period Period @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId, periodId])
+}
+
+model KpiDefinition {
+  id                String  @id @default(cuid())
+  companyId         String
+  code              String
+  name              String
+  category          String
+  definition        String  @default("")
+  formula           String
+  unit              String  @default("EUR")
+  frequency         String  @default("MONTH")
+  direction         String  @default("UP")
+  target            Float?
+  warningThreshold  Float?
+  criticalThreshold Float?
+  dimensionCode     String?
+  requires          String  @default("[]") // JSON string[]
+  ownerRole         String?
+  interpretation    String  @default("")
+  limits            String  @default("")
+  pinned            Boolean @default(false)
+  sortOrder         Int     @default(100)
+
+  company Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  values  KpiValue[]
+
+  @@unique([companyId, code])
+}
+
+model KpiValue {
+  id        String  @id @default(cuid())
+  kpiId     String
+  periodId  String
+  memberCode String?
+  value     Float?
+  status    String  @default("OK")
+
+  kpi    KpiDefinition @relation(fields: [kpiId], references: [id], onDelete: Cascade)
+  period Period        @relation(fields: [periodId], references: [id], onDelete: Cascade)
+
+  @@unique([kpiId, periodId, memberCode])
+}
+
+model CalculationRun {
+  id            String   @id @default(cuid())
+  companyId     String
+  fingerprint   String
+  configVersion Int      @default(0)
+  periodCodes   String   @default("[]")
+  status        String   @default("OK")
+  durationMs    Int      @default(0)
+  createdAt     DateTime @default(now())
+
+  company     Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  allocations CostAllocation[]
+
+  @@index([companyId, fingerprint])
+}
+
+model CostAllocation {
+  id                String  @id @default(cuid())
+  runId             String
+  stage             Int
+  ruleId            String?
+  ruleName          String  @default("")
+  sourceKind        String  @default("entry")
+  sourceRef         String  @default("")
+  targetDimension   String
+  targetMemberCode  String
+  periodCode        String
+  amount            Float
+  driverKey         String?
+  driverValue       Float?
+  driverTotal       Float?
+
+  run CalculationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId, targetDimension, targetMemberCode])
+}
+
+model Scenario {
+  id         String   @id @default(cuid())
+  companyId  String
+  name       String
+  definition String // JSON : leviers
+  result     String   @default("{}") // JSON : impacts calculés
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+model Alert {
+  id            String   @id @default(cuid())
+  companyId     String
+  code          String
+  severity      String   @default("WARNING")
+  title         String
+  message       String
+  periodCode    String
+  dimensionCode String?
+  memberCode    String?
+  value         Float?
+  threshold     Float?
+  status        String   @default("OPEN")
+  payload       String   @default("{}")
+  createdAt     DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status, severity])
+}
+
+model ImportBatch {
+  id           String    @id @default(cuid())
+  companyId    String
+  filename     String
+  rowCount     Int       @default(0)
+  status       String    @default("DRAFT")
+  mapping      String    @default("{}")
+  rawContent   String    @default("")
+  qualityScore Float     @default(0)
+  issues       String    @default("[]")
+  committedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entries Entry[]
+
+  @@index([companyId])
+}
+
+model Report {
+  id         String   @id @default(cuid())
+  companyId  String
+  kind       String   @default("MONTHLY")
+  periodCode String
+  title      String
+  payload    String // JSON : sections, chiffres, commentaire
+  createdAt  DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, periodCode])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  companyId String
+  actorId   String?
+  action    String
+  entity    String
+  entityId  String   @default("")
+  diff      String   @default("{}")
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, createdAt])
+}

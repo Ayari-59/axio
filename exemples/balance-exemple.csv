@@ -1,0 +1,10 @@
+Date facture;Compte;Libellé;Montant HT;Client;Affaire;Nature;Sens
+31/07/2026;706000;Honoraires juillet;42 500,00;Foncia;Refonte SI Delta;;Produit
+31/07/2026;706000;Honoraires juillet;18 900,00;Orion Industries;Audit organisation Orion;;Produit
+31/07/2026;641000;Production A. Martin;16 720,00;Foncia;Refonte SI Delta;PAYROLL;Charge
+31/07/2026;641000;Production S. Benali;9 180,00;Orion Industries;Audit organisation Orion;PAYROLL;Charge
+31/07/2026;611000;Sous-traitance experts;5 400,00;Foncia;Refonte SI Delta;SUBCONTRACTING;Charge
+31/07/2026;625000;Déplacements;1 260,00;Orion Industries;Audit organisation Orion;TRAVEL;Charge
+31/07/2026;606000;Licences et outils;2 350,00;;;TOOLS;Charge
+31/07/2026;641000;Équipe commerciale;6 000,00;;;PAYROLL;Charge
+31/07/2026;613000;Structure et support;12 040,00;;;OVERHEAD;Charge
