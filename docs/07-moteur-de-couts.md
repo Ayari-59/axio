@@ -113,12 +113,43 @@ différence à l'écran.
 | Coût variable (direct costing) | seuls les coûts `VARIABLE` sont affectés aux objets |
 | Coût spécifique / direct evolué | variables + fixes directs (marge contributive) |
 | Coût marginal | coût du dernier lot : `Δcoût total / Δquantité` sur deux périodes ou deux scénarios |
-| ABC | règles `ABC` : ressources → activités (stage 2) → objets par inducteur (stage 3) |
+| ABC | ressources → activités (étape 2) → objets, **chaque activité avec son propre inducteur** (étape 3) |
 | Coût standard / préétabli | budget de type `STANDARD` fournissant `quantité × prix` par unité |
 | Imputation rationnelle | coûts fixes imputés × (activité réelle / activité normale) |
 
 L'imputation rationnelle est un simple coefficient appliqué au stage 3 ; la différence
 (coût de chômage ou boni de suractivité) est isolée dans une ligne dédiée.
+
+### 5.1 Comptabilité par activités
+
+Le cheminement ABC n'est pas un moteur séparé : c'est le cheminement multi-étages, avec l'axe
+`ACTIVITY` comme bassin intermédiaire.
+
+```
+Charges indirectes ──▶ Centres ──▶ ACTIVITÉS ──▶ Objets de coûts
+      (étape 1)                (étape 2)      (étape 3, un inducteur PAR activité)
+```
+
+Ce qui rend l'ABC possible techniquement : une règle d'étape 3 peut être **restreinte à un bassin
+d'origine** (`fromDimensionCode` + `fromMemberCodes`). Le moteur choisit, pour chaque bassin, la
+règle la plus spécifique : une règle nommant l'activité l'emporte sur une règle portant sur l'axe,
+qui l'emporte sur une règle générique. C'est ce qui permet à « Régler les machines » de descendre
+au nombre de réglages pendant que « Usiner » descend aux heures machine.
+
+**Les activités ne sont pas devinées.** Une activité est un choix de modélisation issu de l'analyse
+des processus : aucun export comptable ne la contient. Le produit propose la carte qu'un
+contrôleur de gestion écrirait pour ce modèle économique (`core/templates/activities.ts`, données),
+avec pour chacune l'inducteur qui *cause* la consommation — et non celui qui est facile à compter.
+L'utilisateur ajuste les parts, la somme devant faire 100 %.
+
+**La démonstration se fait par différence.** `compareAllocationMethods` exécute le même jeu de
+données avec et sans les activités, et chiffre le déplacement de charges. Sur le profil industriel
+livré : 24,3 % des charges indirectes changent de destination, et un produit qui paraissait
+rentable en clé unique (+24 670 €) devient déficitaire en ABC (−6 295 €) parce qu'il concentrait
+les réglages et les contrôles. C'est le subventionnement croisé, rendu visible.
+
+Un inducteur sans données n'est jamais remplacé par une approximation : les charges de l'activité
+concernée restent en « non affecté », et l'écran indique quelle donnée saisir.
 
 ## 6. Coût par objet dans les trois profils de référence
 

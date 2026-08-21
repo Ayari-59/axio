@@ -121,5 +121,11 @@ export const DRIVER_CODES = [
   "SETUPS",
   "VISITS",
   "REVENUE",
+  // Inducteurs d'activités (ABC) : ce qui déclenche la consommation, pas ce qui est facile à compter.
+  "PROPOSALS",
+  "PROJECTS",
+  "INVOICES",
+  "CONTROLS",
+  "TICKETS",
 ] as const;
 export type DriverCode = (typeof DRIVER_CODES)[number];

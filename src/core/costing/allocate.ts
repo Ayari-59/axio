@@ -30,6 +30,16 @@ export type Allocation = {
   driverTotal?: number;
 };
 
+/** Bassin de charges intermédiaire : un centre, une activité, tout axe qui reçoit avant de redistribuer. */
+export type Pool = {
+  dimensionCode: string;
+  memberCode: string;
+  directIndirect: number;
+  received: number;
+  given: number;
+  total: number;
+};
+
 export type CenterTotal = {
   memberCode: string;
   directIndirect: number; // charges indirectes rattachées au centre
@@ -40,7 +50,10 @@ export type CenterTotal = {
 
 export type CostingResult = {
   allocations: Allocation[];
+  /** Vue historique, restreinte aux centres. */
   centerTotals: CenterTotal[];
+  /** Tous les bassins intermédiaires, centres et activités confondus. */
+  pools: Pool[];
   /** dimension → membre → { direct, indirect } */
   byObject: Record<string, Record<string, { direct: number; indirect: number }>>;
   totals: {
@@ -133,6 +146,7 @@ export function runCosting(
 
   // ---------------------------------------------------------------- stage 1
   const stage1 = active.filter((r) => r.stage === 1).sort((a, b) => a.sortOrder - b.sortOrder);
+  const stage1Dimension = stage1[0]?.targetDimensionCode ?? "CENTER";
   const centerDirect = new Map<string, number>();
   const consumed = new Set<string>();
   let unallocatedIndirect = 0;
@@ -216,78 +230,108 @@ export function runCosting(
   }
 
   // ---------------------------------------------------------------- stage 2
+  // Les charges rattachées à l'étape 1 forment des « bassins » identifiés par (axe, membre) —
+  // le plus souvent des centres. L'étape 2 déplace ces bassins :
+  //   centre → centre   : prestations réciproques (cycles, résolution itérative) ;
+  //   centre → activité : comptabilité par activités, où le coût transite par les activités
+  //                       avant d'atteindre les objets de coûts (docs/07 §5).
   const stage2 = active.filter((r) => r.stage === 2).sort((a, b) => a.sortOrder - b.sortOrder);
-  const centerTotalsMap = new Map<string, CenterTotal>();
-  for (const [memberCode, amount] of centerDirect) {
-    centerTotalsMap.set(memberCode, {
+
+  const poolKey = (dimensionCode: string, memberCode: string) => `${dimensionCode}|${memberCode}`;
+  const pools = new Map<string, Pool>();
+  const ensurePool = (dimensionCode: string, memberCode: string): Pool => {
+    const existing = pools.get(poolKey(dimensionCode, memberCode));
+    if (existing) return existing;
+    const created: Pool = {
+      dimensionCode,
       memberCode,
-      directIndirect: round2(amount),
+      directIndirect: 0,
       received: 0,
       given: 0,
-      total: amount,
-    });
+      total: 0,
+    };
+    pools.set(poolKey(dimensionCode, memberCode), created);
+    return created;
+  };
+
+  for (const [memberCode, amount] of centerDirect) {
+    const pool = ensurePool(stage1Dimension, memberCode);
+    pool.directIndirect = round2(amount);
+    pool.total = amount;
   }
 
   if (stage2.length > 0) {
-    // Résolution itérative des prestations réciproques (point fixe).
-    const balances = new Map<string, number>();
-    for (const [code, total] of centerDirect) balances.set(code, total);
-
     let iteration = 0;
     let moved = Number.POSITIVE_INFINITY;
+
     while (iteration < 50 && moved > 0.01) {
       moved = 0;
       for (const rule of stage2) {
-        const sources = rule.fromMemberCodes ?? [];
+        const fromDimension = rule.fromDimensionCode ?? stage1Dimension;
+        const sources =
+          rule.fromMemberCodes ??
+          [...pools.values()].filter((p) => p.dimensionCode === fromDimension).map((p) => p.memberCode);
+
         for (const source of sources) {
-          const amount = balances.get(source) ?? 0;
-          if (Math.abs(amount) < 0.01) continue;
-          const weights = (rule.weights ?? []).map((w) => ({ key: w.memberCode, weight: w.weight }));
+          const pool = pools.get(poolKey(fromDimension, source));
+          if (!pool || Math.abs(pool.total) < 0.01) continue;
+
+          const amount = pool.total;
+          const weights =
+            rule.method === "PERCENT"
+              ? (rule.weights ?? []).map((w) => ({ key: w.memberCode, weight: w.weight }))
+              : resolveWeights(dataset, entries, rule.targetDimensionCode, rule.driver).map((w) => ({
+                  key: w.memberCode,
+                  weight: w.weight,
+                }));
+
           const spread = allocateProportional(amount, weights);
           if (spread.length === 0) continue;
-          balances.set(source, 0);
-          const sourceTotal = centerTotalsMap.get(source);
-          if (sourceTotal) sourceTotal.given = round2(sourceTotal.given + amount);
+
+          pool.total = 0;
+          pool.given = round2(pool.given + amount);
+
           for (const part of spread) {
-            balances.set(part.key, (balances.get(part.key) ?? 0) + part.amount);
-            const target =
-              centerTotalsMap.get(part.key) ??
-              ({ memberCode: part.key, directIndirect: 0, received: 0, given: 0, total: 0 } as CenterTotal);
+            const target = ensurePool(rule.targetDimensionCode, part.key);
+            target.total += part.amount;
             target.received = round2(target.received + part.amount);
-            centerTotalsMap.set(part.key, target);
             moved += Math.abs(part.amount);
             allocations.push({
               stage: 2,
               ruleId: rule.id,
               ruleName: rule.name,
-              sourceKind: "center",
+              sourceKind: fromDimension === "ACTIVITY" ? "activity" : "center",
               sourceRef: source,
               periodCode: "",
               targetDimension: rule.targetDimensionCode,
               targetMemberCode: part.key,
               amount: part.amount,
+              driverKey: rule.driver?.key,
             });
           }
         }
       }
       iteration += 1;
     }
+
     if (moved > 0.01) {
       warnings.push(
         "Les prestations réciproques entre centres n'ont pas convergé : vérifiez les pourcentages saisis.",
       );
     }
-    for (const [code, balance] of balances) {
-      const entry =
-        centerTotalsMap.get(code) ??
-        ({ memberCode: code, directIndirect: 0, received: 0, given: 0, total: 0 } as CenterTotal);
-      entry.total = round2(balance);
-      centerTotalsMap.set(code, entry);
-    }
   }
 
-  const centerTotals = [...centerTotalsMap.values()].map((c) => ({ ...c, total: round2(c.total) }));
-  const redistributable = sum(centerTotals.map((c) => c.total));
+  const poolList = [...pools.values()].map((pool) => ({ ...pool, total: round2(pool.total) }));
+  const centerTotals: CenterTotal[] = poolList
+    .filter((pool) => pool.dimensionCode === stage1Dimension)
+    .map(({ memberCode, directIndirect, received, given, total }) => ({
+      memberCode,
+      directIndirect,
+      received,
+      given,
+      total,
+    }));
+  const redistributable = sum(poolList.map((pool) => pool.total));
 
   // ---------------------------------------------------------------- stage 3
   const byObject: CostingResult["byObject"] = {};
@@ -304,6 +348,40 @@ export function runCosting(
       method: "DIRECT",
       targetDimensionCode: "AUTO_COST_OBJECT",
     } as AllocationRuleSpec);
+
+  /**
+   * Règle applicable à un bassin, de la plus spécifique à la plus générale :
+   *   1. une règle nommant explicitement ce membre  → cas ABC, un inducteur par activité ;
+   *   2. une règle portant sur l'axe du bassin      → cas classique, tous les centres ;
+   *   3. une règle sans origine déclarée.
+   * À spécificité égale, l'ordre de tri de la règle tranche.
+   */
+  const pickRule = (pool: Pool, dimensionCode: string): AllocationRuleSpec | undefined => {
+    const candidates = stage3
+      .filter(
+        (rule) =>
+          rule.method !== "DIRECT" &&
+          (rule.targetDimensionCode === dimensionCode || rule.targetDimensionCode === "AUTO_COST_OBJECT"),
+      )
+      .sort((a, b) => {
+        const exact = (rule: AllocationRuleSpec) => (rule.targetDimensionCode === dimensionCode ? 0 : 1);
+        return exact(a) - exact(b) || a.sortOrder - b.sortOrder;
+      });
+
+    return (
+      candidates.find(
+        (rule) =>
+          rule.fromDimensionCode === pool.dimensionCode &&
+          (rule.fromMemberCodes?.includes(pool.memberCode) ?? false),
+      ) ??
+      candidates.find(
+        (rule) =>
+          rule.fromDimensionCode === pool.dimensionCode &&
+          (rule.fromMemberCodes ?? []).length === 0,
+      ) ??
+      candidates.find((rule) => !rule.fromDimensionCode)
+    );
+  };
 
   for (const dimensionCode of objectDims) {
     const bucket: Record<string, { direct: number; indirect: number }> = {};
@@ -331,51 +409,49 @@ export function runCosting(
       });
     }
 
-    // 2) redistribution des centres
-    const rule =
-      stage3.find((r) => r.method !== "DIRECT" && r.targetDimensionCode === dimensionCode) ??
-      stage3.find((r) => r.method !== "DIRECT" && r.targetDimensionCode === "AUTO_COST_OBJECT");
+    // 2) redistribution des bassins (centres, activités…), chacun selon SA règle
+    const missingRules = new Set<string>();
+    for (const pool of poolList) {
+      if (Math.abs(pool.total) < 0.01) continue;
 
-    if (!rule || redistributable === 0) {
-      if (redistributable !== 0) {
-        ensure(UNASSIGNED).indirect += redistributable;
-        warnings.push(
-          `Aucune règle ne redistribue les centres vers l'axe ${dimensionCode} : les charges indirectes restent non affectées.`,
-        );
-      }
-      byObject[dimensionCode] = bucket;
-      continue;
-    }
-
-    const weights =
-      rule.method === "PERCENT"
-        ? (rule.weights ?? []).map((w) => ({ memberCode: w.memberCode, weight: w.weight }))
-        : rule.method === "EQUAL"
-          ? dataset.members
-              .filter((m) => m.dimensionCode === dimensionCode)
-              .map((m) => ({ memberCode: m.code, weight: 1 }))
-          : resolveWeights(dataset, entries, dimensionCode, rule.driver);
-
-    const weightTotal = sum(weights.map((w) => w.weight));
-
-    for (const center of centerTotals) {
-      if (Math.abs(center.total) < 0.01) continue;
-      const spread = allocateProportional(
-        center.total,
-        weights.map((w) => ({ key: w.memberCode, weight: w.weight })),
-      );
-      if (spread.length === 0) {
-        ensure(UNASSIGNED).indirect += center.total;
+      const rule = pickRule(pool, dimensionCode);
+      if (!rule) {
+        ensure(UNASSIGNED).indirect += pool.total;
+        missingRules.add(pool.dimensionCode);
         continue;
       }
+
+      const weights =
+        rule.method === "PERCENT"
+          ? (rule.weights ?? []).map((w) => ({ memberCode: w.memberCode, weight: w.weight }))
+          : rule.method === "EQUAL"
+            ? dataset.members
+                .filter((m) => m.dimensionCode === dimensionCode)
+                .map((m) => ({ memberCode: m.code, weight: 1 }))
+            : resolveWeights(dataset, entries, dimensionCode, rule.driver);
+
+      const weightTotal = sum(weights.map((w) => w.weight));
+      const spread = allocateProportional(
+        pool.total,
+        weights.map((w) => ({ key: w.memberCode, weight: w.weight })),
+      );
+
+      if (spread.length === 0) {
+        ensure(UNASSIGNED).indirect += pool.total;
+        warnings.push(
+          `L'inducteur « ${rule.driver?.key ?? rule.method} » est absent : ${round2(pool.total)} € issus de ${pool.memberCode} restent non affectés sur l'axe ${dimensionCode}.`,
+        );
+        continue;
+      }
+
       for (const part of spread) {
         ensure(part.key).indirect += part.amount;
         allocations.push({
           stage: 3,
           ruleId: rule.id,
           ruleName: rule.name,
-          sourceKind: "center",
-          sourceRef: center.memberCode,
+          sourceKind: pool.dimensionCode === "ACTIVITY" ? "activity" : "center",
+          sourceRef: pool.memberCode,
           periodCode: "",
           targetDimension: dimensionCode,
           targetMemberCode: part.key,
@@ -387,7 +463,13 @@ export function runCosting(
       }
     }
 
-    // Les charges indirectes non rattachées à un centre restent visibles.
+    for (const dimension of missingRules) {
+      warnings.push(
+        `Aucune règle ne redistribue l'axe ${dimension} vers l'axe ${dimensionCode} : ces charges restent non affectées.`,
+      );
+    }
+
+    // Les charges indirectes non rattachées à un bassin restent visibles.
     if (unallocatedIndirect > 0) ensure(UNASSIGNED).indirect += unallocatedIndirect;
 
     for (const key of Object.keys(bucket)) {
@@ -402,6 +484,7 @@ export function runCosting(
   return {
     allocations,
     centerTotals,
+    pools: poolList,
     byObject,
     totals: {
       cost: round2(totalCost),

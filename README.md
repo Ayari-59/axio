@@ -33,9 +33,9 @@ Compte de démonstration : **demo@axio.fr** / **Pilotage2026!**
 ## Vérifier que ça marche
 
 ```bash
-npm test                # 137 tests : moteurs, cas d'école DCG, garde-fous d'architecture
+npm test                # 144 tests : moteurs, cas d'école DCG, garde-fous d'architecture
 npm run inspect 2026-03 # sorties chiffrées des trois entreprises, en ligne de commande
-npm run smoke           # les 61 routes de l'application répondent (dev server requis)
+npm run smoke           # les 64 routes de l'application répondent (dev server requis)
 npm run build           # build de production
 ```
 
@@ -65,7 +65,7 @@ MOTEURS DE CALCUL (purs, testables, sans I/O)
 | `src/core/templates/` | packs de règles sectoriels, catalogue de vocabulaire, plan de comptes — **de la donnée** |
 | `src/lib/`, `src/services/` | persistance, session, orchestration, fournisseur IA |
 | `src/app/` | interface (App Router, RSC + Server Actions) |
-| `tests/` | 137 tests dont les cas d'école du contrôle de gestion |
+| `tests/` | 144 tests dont les cas d'école du contrôle de gestion |
 | `scripts/` | inspection, test de fumée |
 | `exemples/` | export comptable d'exemple à importer |
 
@@ -83,6 +83,9 @@ MOTEURS DE CALCUL (purs, testables, sans I/O)
 - classement direct/indirect, fixe/variable, décomposition des semi-variables (points extrêmes) ;
 - affectation directe, clés de répartition, pourcentages, répartition égale, cheminement en
   trois étapes, prestations réciproques (résolution itérative) ;
+- **comptabilité par activités (ABC)** : bibliothèque d'activités par secteur, un inducteur propre
+  à chaque activité, et comparaison chiffrée avec la clé unique qui révèle le subventionnement
+  croisé entre objets de coûts ;
 - coût variable, coût complet, marge sur coûts variables, marge contributive, marge opérationnelle ;
 - seuil de rentabilité, point mort, marge de sécurité, levier opérationnel ;
 - écarts sur chiffre d'affaires : **prix / volume / composition** (identité vérifiée par test) ;

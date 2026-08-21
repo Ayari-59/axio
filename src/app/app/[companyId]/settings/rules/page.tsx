@@ -8,8 +8,8 @@ import { toggleRuleAction, updateDriverAction } from "./actions";
 
 const STAGE_LABELS: Record<number, string> = {
   1: "Étape 1 — charges → centres",
-  2: "Étape 2 — centres → centres",
-  3: "Étape 3 — centres et charges directes → objets de coûts",
+  2: "Étape 2 — centres → centres et activités",
+  3: "Étape 3 — centres, activités et charges directes → objets de coûts",
 };
 
 const METHOD_LABELS: Record<string, string> = {
@@ -51,6 +51,11 @@ export default async function RulesPage({ params }: { params: Promise<{ companyI
       <PageHeader
         title="Règles d'affectation"
         description="Le cheminement des charges est entièrement paramétrable : source, méthode, inducteur et ordre. Chaque modification est immédiatement reflétée dans les coûts et les marges."
+        action={
+          <a href={`/app/${companyId}/settings/activities`} className="text-sm text-brand-600">
+            Comptabilité par activités →
+          </a>
+        }
       />
 
       <div className="space-y-5">

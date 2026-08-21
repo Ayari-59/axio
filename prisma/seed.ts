@@ -18,6 +18,7 @@ import bcrypt from "bcryptjs";
 import { businessModelProfileSchema, type BusinessModelProfile } from "../src/core/model/profile";
 import { applyConfiguration, buildConfigurationPlan, ensurePeriods } from "../src/services/configuration.service";
 import { createBudgetFromHistory } from "../src/services/budget.service";
+import { applyActivityMap, loadActivityMap } from "../src/services/abc.service";
 
 const pool = new Pool({
   connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
@@ -439,11 +440,14 @@ async function seedManufacturing(organizationId: string) {
     }),
   });
 
+  // setups / controls / orders : la complexité ne suit pas le volume. Le Carter X, petite série
+  // très technique, mobilise l'atelier bien au-delà de ses heures machine — c'est exactement ce
+  // que la clé unique masque et que l'ABC révèle.
   const products = [
-    { code: "VANNE_DN80", label: "Vanne DN80", price: 148, material: 61, units: 14_400 },
-    { code: "BRIDE_A2", label: "Bride A2", price: 62, material: 26, units: 31_200 },
-    { code: "CARTER_X", label: "Carter X", price: 310, material: 138, units: 5_400 },
-    { code: "AXE_T4", label: "Axe T4", price: 44, material: 17, units: 44_400 },
+    { code: "VANNE_DN80", label: "Vanne DN80", price: 148, material: 61, units: 14_400, setups: 4, controls: 6, orders: 3, deliveries: 8, invoices: 12 },
+    { code: "BRIDE_A2", label: "Bride A2", price: 62, material: 26, units: 31_200, setups: 5, controls: 4, orders: 4, deliveries: 10, invoices: 15 },
+    { code: "CARTER_X", label: "Carter X", price: 310, material: 138, units: 5_400, setups: 22, controls: 30, orders: 11, deliveries: 14, invoices: 26 },
+    { code: "AXE_T4", label: "Axe T4", price: 44, material: 17, units: 44_400, setups: 3, controls: 2, orders: 2, deliveries: 6, invoices: 9 },
   ];
   const clients = [
     { code: "AIRTEC", label: "Airtec" },
@@ -512,6 +516,15 @@ async function seedManufacturing(organizationId: string) {
         memberCode: product.code,
         value: Math.round(units * (0.02 + index * 0.0012)),
       });
+      for (const [driverCode, value] of [
+        ["SETUPS", product.setups],
+        ["CONTROLS", product.controls],
+        ["ORDERS", product.orders],
+        ["DELIVERIES", product.deliveries],
+        ["INVOICES", product.invoices],
+      ] as const) {
+        drivers.push({ periodCode, driverCode, dimensionCode: "PRODUCT", memberCode: product.code, value });
+      }
       drivers.push({ periodCode, driverCode: "MACHINE_HOURS", dimensionCode: "CENTER", memberCode: "MACHINING", value: machineHours * 0.7 });
       drivers.push({ periodCode, driverCode: "MACHINE_HOURS", dimensionCode: "CENTER", memberCode: "ASSEMBLY", value: machineHours * 0.3 });
     });
@@ -843,6 +856,22 @@ async function main() {
     const { plan } = await buildConfigurationPlan(company.id);
     await applyConfiguration(company.id, plan, null);
   }
+
+  // L'entreprise industrielle est livrée avec sa comptabilité par activités : c'est le profil
+  // où l'écart avec la clé unique est le plus démonstratif (petites séries complexes).
+  console.log("Carte d'activités de l'entreprise industrielle…");
+  const activityMap = await loadActivityMap(manufacturing.id);
+  await applyActivityMap(
+    manufacturing.id,
+    activityMap.activities.map((a) => ({
+      code: a.code,
+      label: a.label,
+      driverKey: a.driverKey,
+      share: a.share,
+      rationale: a.rationale,
+    })),
+    null,
+  );
 
   const counts = await Promise.all(
     [consulting, manufacturing, construction].map(async (company) => ({

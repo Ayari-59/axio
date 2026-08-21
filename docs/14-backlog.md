@@ -68,7 +68,7 @@ Cette colonne est tenue à jour avec le code : elle ne décrit pas une intention
 | 5.4 | Répartition en pourcentages personnalisés | 2 | [MVP] ✅ |
 | 5.5 | Cheminement multi-étages (charges → centres → objets) | 5 | [MVP] ✅ |
 | 5.6 | Prestations réciproques entre centres auxiliaires | 5 | [MVP] ◐ moteur (résolution itérative) livré ; éditeur d'étape 2 [V1] |
-| 5.7 | ABC : ressources → activités → inducteurs → objets | 5 | [MVP] ◐ chaîne multi-étages et axe Activité livrés ; assistant de création d'activités [V1] |
+| 5.7 | ABC : ressources → activités → inducteurs → objets | 5 | [MVP] ✅ bibliothèque par secteur, génération des deux étages, écran de paramétrage, comparaison chiffrée avec la clé unique |
 | 5.8 | Décomposition des coûts semi-variables (points extrêmes) | 3 | [MVP] ✅ |
 | 5.9 | Coûts standards et préétablis | 3 | [V1] |
 | 5.10 | Imputation rationnelle des charges fixes | 3 | [V1] |
@@ -162,7 +162,7 @@ Cette colonne est tenue à jour avec le code : elle ne décrit pas une intention
 | 12.5 | Benchmarking anonymisé inter-entreprises | 13 | [V3] |
 | 12.6 | API publique complète | 8 | [V2] |
 
-**Total MVP livré : ~180 points**, dont 4 éléments partiels (◐) dont le moteur est en place et
+**Total MVP livré : ~185 points**, dont 3 éléments partiels (◐) dont le moteur est en place et
 l'interface planifiée en V1.
 
 ### Vérification du statut

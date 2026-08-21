@@ -54,6 +54,7 @@ async function main() {
       `${base}/data`,
       `${base}/settings`,
       `${base}/settings/rules`,
+      `${base}/settings/activities`,
       `${base}/onboarding`,
       `${base}/onboarding/plan`,
     );

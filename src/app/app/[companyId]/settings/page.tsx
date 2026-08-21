@@ -106,9 +106,14 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
           title="Axes d'analyse"
           subtitle="Le vocabulaire est le vôtre : « chantier », « mission » ou « produit » ne sont que des libellés"
           action={
-            <Link href={`${base}/settings/rules`} className="text-xs text-brand-600">
-              Règles d&apos;affectation
-            </Link>
+            <div className="flex gap-3">
+              <Link href={`${base}/settings/rules`} className="text-xs text-brand-600">
+                Règles d&apos;affectation
+              </Link>
+              <Link href={`${base}/settings/activities`} className="text-xs text-brand-600">
+                Activités (ABC)
+              </Link>
+            </div>
           }
         >
           <Table headers={["Axe", "Code", "Rôle", "Objet de coût", "Membres"]}>
