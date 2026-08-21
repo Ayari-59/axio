@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { audit, loadDataset } from "@/lib/repository";
 import { parseJsonLoose } from "@/lib/json";
@@ -282,45 +283,52 @@ export async function commitImport(
   const accounts = await prisma.account.findMany({ where: { companyId } });
   const accountByNumber = new Map(accounts.map((a) => [a.number, a]));
 
-  // 4. Écritures, par lots
-  let imported = 0;
-  const chunkSize = 200;
-  for (let i = 0; i < rows.length; i += chunkSize) {
-    const chunk = rows.slice(i, i + chunkSize);
-    await prisma.$transaction(
-      chunk.map(({ entry }) => {
-        const period = periodByCode.get(entry!.periodCode);
-        const links = Object.entries(entry!.dims)
-          .map(([dimensionCode, memberCode]) => {
-            const dimension = dimensionByCode.get(dimensionCode);
-            if (!dimension) return null;
-            const member = memberByKey.get(memberKey(dimension.id, memberCode));
-            if (!member) return null;
-            return { dimensionId: dimension.id, memberId: member.id };
-          })
-          .filter((v): v is { dimensionId: string; memberId: string } => v !== null);
+  // 4. Écritures — insertions groupées.
+  // Surtout pas 200 créations imbriquées dans une transaction : sur une base distante,
+  // les allers-retours dépassent le délai de transaction de Prisma (P2028) dès quelques
+  // centaines de lignes. On génère les identifiants pour créer les liens dimensionnels
+  // dans un second lot.
+  const entryRows: Record<string, unknown>[] = [];
+  const linkRows: Record<string, unknown>[] = [];
 
-        return prisma.entry.create({
-          data: {
-            companyId,
-            periodId: period!.id,
-            date: new Date(entry!.date),
-            kind: entry!.kind,
-            amount: entry!.amount,
-            quantity: entry!.quantity,
-            unitPrice: entry!.unitPrice,
-            accountId: entry!.accountNumber ? (accountByNumber.get(entry!.accountNumber)?.id ?? null) : null,
-            behavior: entry!.behavior,
-            traceability: entry!.traceability,
-            label: entry!.label,
-            importBatchId: batchId,
-            dimensions: { create: links },
-          },
-        });
-      }),
-    );
-    imported += chunk.length;
+  for (const { entry } of rows) {
+    const period = periodByCode.get(entry!.periodCode);
+    if (!period) continue;
+    const entryId = randomUUID();
+
+    entryRows.push({
+      id: entryId,
+      companyId,
+      periodId: period.id,
+      date: new Date(entry!.date),
+      kind: entry!.kind,
+      amount: entry!.amount,
+      quantity: entry!.quantity,
+      unitPrice: entry!.unitPrice,
+      accountId: entry!.accountNumber ? (accountByNumber.get(entry!.accountNumber)?.id ?? null) : null,
+      behavior: entry!.behavior,
+      traceability: entry!.traceability,
+      label: entry!.label,
+      importBatchId: batchId,
+    });
+
+    for (const [dimensionCode, memberCode] of Object.entries(entry!.dims)) {
+      const dimension = dimensionByCode.get(dimensionCode);
+      if (!dimension) continue;
+      const member = memberByKey.get(memberKey(dimension.id, memberCode));
+      if (!member) continue;
+      linkRows.push({ id: randomUUID(), entryId, dimensionId: dimension.id, memberId: member.id });
+    }
   }
+
+  const BATCH = 500;
+  for (let i = 0; i < entryRows.length; i += BATCH) {
+    await prisma.entry.createMany({ data: entryRows.slice(i, i + BATCH) as never });
+  }
+  for (let i = 0; i < linkRows.length; i += BATCH) {
+    await prisma.entryDimension.createMany({ data: linkRows.slice(i, i + BATCH) as never });
+  }
+  const imported = entryRows.length;
 
   await prisma.importBatch.update({
     where: { id: batchId },

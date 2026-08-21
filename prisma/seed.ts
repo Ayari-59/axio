@@ -10,6 +10,7 @@
  * exactement les mêmes chiffres (condition des tests de non-régression numérique).
  */
 
+import { randomUUID } from "node:crypto";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 import { PrismaClient } from "../src/generated/prisma/client";
@@ -35,6 +36,22 @@ function mulberry32(seed: number) {
     t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
+}
+
+/** Identifiant applicatif : permet de créer les lignes liées dans un second lot groupé. */
+function newId(): string {
+  return randomUUID();
+}
+
+/** Insertion par lots de 500 : au-delà, la requête devient trop lourde pour le pooler. */
+async function insertMany<T>(
+  create: (rows: T[]) => Promise<unknown>,
+  rows: T[],
+  size = 500,
+): Promise<void> {
+  for (let i = 0; i < rows.length; i += size) {
+    await create(rows.slice(i, i + size));
+  }
 }
 
 const PERIODS = [
@@ -96,41 +113,43 @@ async function insertEntries(companyId: string, entries: EntryInput[]) {
   const dimensionByCode = new Map(dimensions.map((d) => [d.code, d]));
   const memberByKey = new Map(members.map((m) => [`${m.dimensionId}|${m.code}`, m]));
 
-  const chunk = 200;
-  for (let i = 0; i < entries.length; i += chunk) {
-    await prisma.$transaction(
-      entries.slice(i, i + chunk).map((entry) => {
-        const period = periodByCode.get(entry.periodCode);
-        if (!period) throw new Error(`Période ${entry.periodCode} absente`);
-        const links = Object.entries(entry.dims)
-          .map(([dimensionCode, memberCode]) => {
-            const dimension = dimensionByCode.get(dimensionCode);
-            if (!dimension) return null;
-            const member = memberByKey.get(`${dimension.id}|${memberCode}`);
-            if (!member) return null;
-            return { dimensionId: dimension.id, memberId: member.id };
-          })
-          .filter((v): v is { dimensionId: string; memberId: string } => v !== null);
+  // Insertions groupées : une base distante ne supporte pas 200 allers-retours dans une
+  // transaction de 5 s (erreur P2028). Les identifiants sont générés ici pour pouvoir
+  // créer les liens dimensionnels dans un second lot.
+  const entryRows: Record<string, unknown>[] = [];
+  const linkRows: Record<string, unknown>[] = [];
 
-        const [year, month] = entry.periodCode.split("-").map(Number);
-        return prisma.entry.create({
-          data: {
-            companyId,
-            periodId: period.id,
-            date: new Date(Date.UTC(year, month - 1, 28)),
-            kind: entry.kind,
-            amount: Math.round(entry.amount * 100) / 100,
-            quantity: entry.quantity ?? null,
-            unitPrice: entry.unitPrice ?? null,
-            behavior: entry.behavior,
-            traceability: entry.traceability,
-            label: entry.label,
-            dimensions: { create: links },
-          },
-        });
-      }),
-    );
+  for (const entry of entries) {
+    const period = periodByCode.get(entry.periodCode);
+    if (!period) throw new Error(`Période ${entry.periodCode} absente`);
+    const entryId = newId();
+    const [year, month] = entry.periodCode.split("-").map(Number);
+
+    entryRows.push({
+      id: entryId,
+      companyId,
+      periodId: period.id,
+      date: new Date(Date.UTC(year, month - 1, 28)),
+      kind: entry.kind,
+      amount: Math.round(entry.amount * 100) / 100,
+      quantity: entry.quantity ?? null,
+      unitPrice: entry.unitPrice ?? null,
+      behavior: entry.behavior,
+      traceability: entry.traceability,
+      label: entry.label,
+    });
+
+    for (const [dimensionCode, memberCode] of Object.entries(entry.dims)) {
+      const dimension = dimensionByCode.get(dimensionCode);
+      if (!dimension) continue;
+      const member = memberByKey.get(`${dimension.id}|${memberCode}`);
+      if (!member) continue;
+      linkRows.push({ id: newId(), entryId, dimensionId: dimension.id, memberId: member.id });
+    }
   }
+
+  await insertMany((rows) => prisma.entry.createMany({ data: rows as never }), entryRows);
+  await insertMany((rows) => prisma.entryDimension.createMany({ data: rows as never }), linkRows);
 }
 
 async function insertDrivers(companyId: string, drivers: DriverInput[]) {
@@ -143,27 +162,23 @@ async function insertDrivers(companyId: string, drivers: DriverInput[]) {
   const dimensionByCode = new Map(dimensions.map((d) => [d.code, d]));
   const memberByKey = new Map(members.map((m) => [`${m.dimensionId}|${m.code}`, m]));
 
-  const chunk = 200;
-  for (let i = 0; i < drivers.length; i += chunk) {
-    await prisma.$transaction(
-      drivers.slice(i, i + chunk).map((driver) => {
-        const period = periodByCode.get(driver.periodCode)!;
-        const dimension = driver.dimensionCode ? dimensionByCode.get(driver.dimensionCode) : undefined;
-        const member =
-          dimension && driver.memberCode ? memberByKey.get(`${dimension.id}|${driver.memberCode}`) : undefined;
-        return prisma.driverValue.create({
-          data: {
-            companyId,
-            periodId: period.id,
-            driverCode: driver.driverCode,
-            dimensionId: dimension?.id ?? null,
-            memberId: member?.id ?? null,
-            value: Math.round(driver.value * 100) / 100,
-          },
-        });
-      }),
-    );
-  }
+  const rows = drivers.map((driver) => {
+    const period = periodByCode.get(driver.periodCode)!;
+    const dimension = driver.dimensionCode ? dimensionByCode.get(driver.dimensionCode) : undefined;
+    const member =
+      dimension && driver.memberCode ? memberByKey.get(`${dimension.id}|${driver.memberCode}`) : undefined;
+    return {
+      id: newId(),
+      companyId,
+      periodId: period.id,
+      driverCode: driver.driverCode,
+      dimensionId: dimension?.id ?? null,
+      memberId: member?.id ?? null,
+      value: Math.round(driver.value * 100) / 100,
+    };
+  });
+
+  await insertMany((batch) => prisma.driverValue.createMany({ data: batch as never }), rows);
 }
 
 async function setupCompany(input: {

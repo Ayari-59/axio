@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { prisma } from "@/lib/db";
 import { audit, loadDataset } from "@/lib/repository";
 import { round2 } from "@/core/model/money";
@@ -120,8 +121,10 @@ export async function createBudgetFromHistory(input: {
   });
 
   const targetByMonth = new Map(targetPeriods.map((p) => [Number(p.code.split("-")[1]), p]));
-  let created = 0;
 
+  // Insertion groupée : une base distante ne supporte pas quelques centaines de créations
+  // ligne à ligne dans le temps d'une requête HTTP.
+  const lines: Record<string, unknown>[] = [];
   for (const bucket of buckets.values()) {
     const period = targetByMonth.get(bucket.month);
     if (!period) continue;
@@ -130,22 +133,25 @@ export async function createBudgetFromHistory(input: {
     if (amount === 0) continue;
     const quantity = bucket.quantity > 0 ? round2(bucket.quantity * (bucket.kind === "REVENUE" ? factor : 1)) : null;
 
-    await prisma.budgetLine.create({
-      data: {
-        budgetId: budget.id,
-        periodId: period.id,
-        kind: bucket.kind,
-        natureCode: bucket.natureCode,
-        behavior: bucket.behavior,
-        dimensions: JSON.stringify(bucket.dims),
-        quantity,
-        unitPrice: quantity && quantity !== 0 ? round2(amount / quantity) : null,
-        amount,
-        label: bucket.natureCode ?? (bucket.kind === "REVENUE" ? "Chiffre d'affaires" : "Charges"),
-      },
+    lines.push({
+      id: randomUUID(),
+      budgetId: budget.id,
+      periodId: period.id,
+      kind: bucket.kind,
+      natureCode: bucket.natureCode,
+      behavior: bucket.behavior,
+      dimensions: JSON.stringify(bucket.dims),
+      quantity,
+      unitPrice: quantity && quantity !== 0 ? round2(amount / quantity) : null,
+      amount,
+      label: bucket.natureCode ?? (bucket.kind === "REVENUE" ? "Chiffre d'affaires" : "Charges"),
     });
-    created += 1;
   }
+
+  for (let i = 0; i < lines.length; i += 500) {
+    await prisma.budgetLine.createMany({ data: lines.slice(i, i + 500) as never });
+  }
+  const created = lines.length;
 
   await audit({
     companyId,
