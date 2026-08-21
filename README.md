@@ -28,7 +28,7 @@ Compte de démonstration : **demo@axio.fr** / **Pilotage2026!**
 ## Vérifier que ça marche
 
 ```bash
-npm test                # 135 tests : moteurs, cas d'école DCG, garde-fous d'architecture
+npm test                # 137 tests : moteurs, cas d'école DCG, garde-fous d'architecture
 npm run inspect 2026-03 # sorties chiffrées des trois entreprises, en ligne de commande
 npm run smoke           # les 61 routes de l'application répondent (dev server requis)
 npm run build           # build de production
@@ -60,7 +60,7 @@ MOTEURS DE CALCUL (purs, testables, sans I/O)
 | `src/core/templates/` | packs de règles sectoriels, catalogue de vocabulaire, plan de comptes — **de la donnée** |
 | `src/lib/`, `src/services/` | persistance, session, orchestration, fournisseur IA |
 | `src/app/` | interface (App Router, RSC + Server Actions) |
-| `tests/` | 135 tests dont les cas d'école du contrôle de gestion |
+| `tests/` | 137 tests dont les cas d'école du contrôle de gestion |
 | `scripts/` | inspection, test de fumée |
 | `exemples/` | export comptable d'exemple à importer |
 
