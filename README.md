@@ -122,6 +122,7 @@ Hébergement **Vercel**, base **Neon** (PostgreSQL, région Frankfurt).
 | Base | projet Neon `axio` — l'intégration Vercel injecte `DATABASE_URL` (pooler) et `DATABASE_URL_UNPOOLED` |
 | Variables à ajouter à la main | `DIRECT_URL` (endpoint direct) et `AUTH_SECRET` |
 | Protection | Vercel Authentication sur les **previews** seulement ; l'URL de production est ouverte, l'application exigeant sa propre connexion |
+| Région d'exécution | `fra1` (`vercel.json`) — **à co-localiser avec la base**, voir ci-dessous |
 
 Points qui ont coûté du temps et qu'il ne faut pas refaire :
 
@@ -133,7 +134,11 @@ Points qui ont coûté du temps et qu'il ne faut pas refaire :
 3. **Ne pas cocher « Sensitive »** sur les variables : elles deviennent illisibles ensuite, y
    compris en CLI, et il faut les supprimer pour les corriger.
 4. **Une modification de variable ne redéploie pas.** Il faut relancer un build.
-5. **Vercel Authentication est active par défaut** et renvoie un 302 vers le portail Vercel sur
+5. **Co-localiser les fonctions et la base.** Par défaut, Vercel exécute à Washington : avec une
+   base à Francfort, chaque page enchaînait une dizaine d'allers-retours transatlantiques et
+   répondait en 4 s. `"regions": ["fra1"]` dans `vercel.json` ramène le temps de réponse à
+   ~550 ms, soit sept fois mieux, pour une ligne de configuration.
+6. **Vercel Authentication est active par défaut** et renvoie un 302 vers le portail Vercel sur
    toutes les URL — un symptôme qui ressemble à une panne applicative alors que l'application
    n'a jamais été atteinte.
 
