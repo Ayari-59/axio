@@ -785,6 +785,288 @@ async function seedConstruction(organizationId: string) {
   return company;
 }
 
+// ------------------------------------------------------- 4. cas d'école
+
+/**
+ * Atelier Lumen — entreprise d'apprentissage.
+ *
+ * Contrairement aux trois autres jeux, celui-ci n'imite pas le désordre du réel : ses chiffres
+ * sont choisis pour **tomber juste**. Le contrôleur de gestion qui apprend l'outil doit pouvoir
+ * refaire chaque calcul de tête et confronter son résultat à l'écran — c'est la seule façon de
+ * savoir si l'on a compris l'outil, ou seulement cru le comprendre.
+ *
+ * Mars 2026 est le mois de référence : tous les volumes y valent exactement leur valeur nominale.
+ * Le parcours guidé (docs/19-cas-pratique.md) s'appuie sur ce mois.
+ *
+ *   Lampe Nova   — série     1 000 u × 120 €  · matière 40 · MOD 20 · 0,5 h machine · 4 réglages
+ *   Lustre Opus  — sur mesure  100 u × 500 €  · matière 160 · MOD 80 · 1 h machine · 20 réglages
+ *
+ * Toute la démonstration tient dans un renversement : au coût complet classique, le lustre
+ * paraît très rentable ; en ABC, il est vendu à perte.
+ */
+
+const LUMEN_FACTORS = [
+  0.9, 0.92, 0.95, 0.93, 0.96, 0.98, 0.94, 0.6, 0.97, 1.0, 1.02, 1.05, // 2025
+  0.96, 0.98, 1.0, 1.02, 1.04, 1.06, // 2026 — mars (index 14) vaut exactement 1
+];
+
+const LUMEN_PRODUCTS = [
+  {
+    code: "LAMPE_NOVA",
+    label: "Lampe Nova (série)",
+    client: "DISTRIB_NORD",
+    units: 1_000,
+    price: 120,
+    material: 40,
+    labour: 20,
+    machineHoursPerUnit: 0.5,
+    setups: 4,
+    orders: 20,
+  },
+  {
+    code: "LUSTRE_OPUS",
+    label: "Lustre Opus (sur mesure)",
+    client: "HOTEL_RIVAGE",
+    units: 100,
+    price: 500,
+    material: 160,
+    labour: 80,
+    machineHoursPerUnit: 1,
+    setups: 20,
+    orders: 30,
+  },
+];
+
+async function seedCaseStudy(organizationId: string) {
+  const company = await setupCompany({
+    organizationId,
+    name: "Atelier Lumen",
+    industry: "manufacturing",
+    activity: "Cas d'école — fabrication de luminaires, chiffres calculables à la main",
+    profile: profile({
+      identity: { activity: "Fabrication de luminaires", revenueBand: 2_040_000, headcount: 12, siteCount: 1 },
+      revenue: { models: ["unit"], billingUnits: ["quantity"], recurringSharePct: 0, seasonality: "moderate", topClientSharePct: 71 },
+      costs: {
+        payrollSharePct: 19,
+        purchasesSharePct: 39,
+        subcontractingSharePct: 0,
+        overheadSharePct: 42,
+        indirectSharePct: 42,
+        marginDrivers: ["material_cost", "mix", "productivity"],
+      },
+      organization: { units: [{ type: "workshop", label: "Ateliers", count: 1 }] },
+      pilotObjects: ["PRODUCT", "CLIENT"],
+      objectLabels: { PRODUCT: "Produit", CENTER: "Centre" },
+      objectives: ["improve_margin", "pricing", "reduce_cost"],
+      maturity: "advanced",
+      dataSources: ["accounting", "erp"],
+    }),
+  });
+
+  await createMembers(company.id, "CLIENT", [
+    { code: "DISTRIB_NORD", label: "Distrib Nord" },
+    { code: "HOTEL_RIVAGE", label: "Hôtel Rivage" },
+  ]);
+  await createMembers(
+    company.id,
+    "PRODUCT",
+    LUMEN_PRODUCTS.map((p) => ({ code: p.code, label: p.label })),
+  );
+
+  const entries: EntryInput[] = [];
+  const drivers: DriverInput[] = [];
+
+  PERIODS.forEach((periodCode, index) => {
+    const factor = LUMEN_FACTORS[index] ?? 1;
+    let machineHours = 0;
+
+    for (const product of LUMEN_PRODUCTS) {
+      const units = Math.round(product.units * factor);
+      machineHours += units * product.machineHoursPerUnit;
+
+      entries.push({
+        periodCode,
+        kind: "REVENUE",
+        amount: units * product.price,
+        quantity: units,
+        unitPrice: product.price,
+        behavior: "VARIABLE",
+        traceability: "DIRECT",
+        label: `Ventes ${product.label}`,
+        dims: { PRODUCT: product.code, CLIENT: product.client },
+      });
+
+      entries.push({
+        periodCode,
+        kind: "COST",
+        amount: units * product.material,
+        quantity: units,
+        unitPrice: product.material,
+        behavior: "VARIABLE",
+        traceability: "DIRECT",
+        label: `Matières ${product.label}`,
+        dims: { PRODUCT: product.code, NATURE: "MATERIAL", CENTER: "ATELIER" },
+      });
+
+      entries.push({
+        periodCode,
+        kind: "COST",
+        amount: units * product.labour,
+        quantity: units,
+        unitPrice: product.labour,
+        behavior: "VARIABLE",
+        traceability: "DIRECT",
+        label: `Main-d'œuvre directe ${product.label}`,
+        dims: { PRODUCT: product.code, NATURE: "PAYROLL", CENTER: "ATELIER" },
+      });
+
+      drivers.push(
+        { periodCode, driverCode: "UNITS_PRODUCED", dimensionCode: "PRODUCT", memberCode: product.code, value: units },
+        {
+          periodCode,
+          driverCode: "MACHINE_HOURS",
+          dimensionCode: "PRODUCT",
+          memberCode: product.code,
+          value: units * product.machineHoursPerUnit,
+        },
+        { periodCode, driverCode: "SETUPS", dimensionCode: "PRODUCT", memberCode: product.code, value: product.setups },
+        { periodCode, driverCode: "ORDERS", dimensionCode: "PRODUCT", memberCode: product.code, value: product.orders },
+      );
+    }
+
+    // Énergie semi-variable : 3 000 € de part fixe + 4 € par heure machine.
+    // La méthode des points extrêmes doit retrouver exactement ces deux valeurs.
+    entries.push(
+      {
+        periodCode,
+        kind: "COST",
+        amount: 3_000 + 4 * machineHours,
+        behavior: "SEMI_VARIABLE",
+        traceability: "INDIRECT",
+        label: "Énergie de l'atelier",
+        dims: { NATURE: "ENERGY", CENTER: "ATELIER" },
+      },
+      {
+        periodCode,
+        kind: "COST",
+        amount: 34_600,
+        behavior: "FIXED",
+        traceability: "INDIRECT",
+        label: "Amortissements et entretien de l'atelier",
+        dims: { NATURE: "MAINTENANCE", CENTER: "ATELIER" },
+      },
+      {
+        periodCode,
+        kind: "COST",
+        amount: 20_000,
+        behavior: "FIXED",
+        traceability: "INDIRECT",
+        label: "Administration et ordonnancement",
+        dims: { NATURE: "OVERHEAD", CENTER: "ADMIN" },
+      },
+    );
+
+    drivers.push(
+      { periodCode, driverCode: "FTE", value: 12 },
+      { periodCode, driverCode: "HEADCOUNT", dimensionCode: "CENTER", memberCode: "MACHINING", value: 8 },
+      { periodCode, driverCode: "HEADCOUNT", dimensionCode: "CENTER", memberCode: "ADMIN", value: 4 },
+    );
+  });
+
+  await insertEntries(company.id, entries);
+  await insertDrivers(company.id, drivers);
+
+  return company;
+}
+
+/**
+ * Budget 2026 volontairement plat et rond : l'écart de mars se décompose de tête.
+ *   budget  900 lampes × 120 € + 100 lustres × 520 €  = 160 000 € pour 1 000 unités → prix moyen 160 €
+ *   réel  1 000 lampes × 120 € + 100 lustres × 500 €  = 170 000 € pour 1 100 unités
+ *   écart +10 000 = prix −2 000 + volume +16 000 + composition −4 000
+ */
+async function seedCaseBudget(companyId: string) {
+  const periods = await prisma.period.findMany({ where: { companyId, fiscalYear: 2026 } });
+  const budget = await prisma.budget.create({
+    data: {
+      companyId,
+      name: "Budget 2026",
+      fiscalYear: 2026,
+      kind: "BUDGET",
+      scenario: "BASE",
+      version: 1,
+      status: "APPROVED",
+    },
+  });
+
+  const plan = [
+    { code: "LAMPE_NOVA", client: "DISTRIB_NORD", quantity: 900, price: 120, material: 40, labour: 20 },
+    { code: "LUSTRE_OPUS", client: "HOTEL_RIVAGE", quantity: 100, price: 520, material: 160, labour: 80 },
+  ];
+
+  const lines: Record<string, unknown>[] = [];
+  for (const period of periods) {
+    for (const item of plan) {
+      lines.push(
+        {
+          id: newId(),
+          budgetId: budget.id,
+          periodId: period.id,
+          kind: "REVENUE",
+          natureCode: null,
+          behavior: "VARIABLE",
+          dimensions: JSON.stringify({ PRODUCT: item.code, CLIENT: item.client }),
+          quantity: item.quantity,
+          unitPrice: item.price,
+          amount: item.quantity * item.price,
+          label: `Ventes ${item.code}`,
+        },
+        {
+          id: newId(),
+          budgetId: budget.id,
+          periodId: period.id,
+          kind: "COST",
+          natureCode: "MATERIAL",
+          behavior: "VARIABLE",
+          dimensions: JSON.stringify({ PRODUCT: item.code, NATURE: "MATERIAL" }),
+          quantity: item.quantity,
+          unitPrice: item.material,
+          amount: item.quantity * item.material,
+          label: "Matières",
+        },
+        {
+          id: newId(),
+          budgetId: budget.id,
+          periodId: period.id,
+          kind: "COST",
+          natureCode: "PAYROLL",
+          behavior: "VARIABLE",
+          dimensions: JSON.stringify({ PRODUCT: item.code, NATURE: "PAYROLL" }),
+          quantity: item.quantity,
+          unitPrice: item.labour,
+          amount: item.quantity * item.labour,
+          label: "Main-d'œuvre directe",
+        },
+      );
+    }
+    lines.push({
+      id: newId(),
+      budgetId: budget.id,
+      periodId: period.id,
+      kind: "COST",
+      natureCode: "OVERHEAD",
+      behavior: "FIXED",
+      dimensions: JSON.stringify({ NATURE: "OVERHEAD" }),
+      quantity: null,
+      unitPrice: null,
+      amount: 60_000,
+      label: "Charges indirectes",
+    });
+  }
+
+  await insertMany((batch) => prisma.budgetLine.createMany({ data: batch as never }), lines);
+}
+
 // --------------------------------------------------------------------- main
 
 async function main() {
@@ -831,11 +1113,11 @@ async function main() {
     data: { userId: user.id, organizationId: organization.id, role: "ADMIN" },
   });
 
-  console.log("1/3 — Delta Conseil (services facturés au temps)…");
+  console.log("1/4 — Delta Conseil (services facturés au temps)…");
   const consulting = await seedConsulting(organization.id);
-  console.log("2/3 — Nordmeca (industrie)…");
+  console.log("2/4 — Nordmeca (industrie)…");
   const manufacturing = await seedManufacturing(organization.id);
-  console.log("3/3 — Bâtir Atlantique (BTP)…");
+  console.log("3/4 — Bâtir Atlantique (BTP)…");
   const construction = await seedConstruction(organization.id);
 
   console.log("Budgets 2026 construits depuis le réel 2025…");
@@ -859,6 +1141,19 @@ async function main() {
 
   // L'entreprise industrielle est livrée avec sa comptabilité par activités : c'est le profil
   // où l'écart avec la clé unique est le plus démonstratif (petites séries complexes).
+  console.log("4/4 — Atelier Lumen (cas d'école)…");
+  const lumen = await seedCaseStudy(organization.id);
+  await seedCaseBudget(lumen.id);
+  await applyActivityMap(
+    lumen.id,
+    [
+      { code: "USINER", label: "Usiner", driverKey: "MACHINE_HOURS", share: 50, rationale: "Seule activité proportionnelle au temps de passage sur les machines." },
+      { code: "REGLER", label: "Régler les séries", driverKey: "SETUPS", share: 25, rationale: "Un réglage coûte le même travail quelle que soit la taille de la série : c'est lui qui révèle le coût des petites séries." },
+      { code: "ADMINISTRER", label: "Administrer les commandes", driverKey: "ORDERS", share: 25, rationale: "Le travail administratif suit le nombre de commandes, pas leur montant." },
+    ],
+    null,
+  );
+
   console.log("Carte d'activités de l'entreprise industrielle…");
   const activityMap = await loadActivityMap(manufacturing.id);
   await applyActivityMap(
@@ -874,7 +1169,7 @@ async function main() {
   );
 
   const counts = await Promise.all(
-    [consulting, manufacturing, construction].map(async (company) => ({
+    [consulting, manufacturing, construction, lumen].map(async (company) => ({
       name: company.name,
       entries: await prisma.entry.count({ where: { companyId: company.id } }),
       drivers: await prisma.driverValue.count({ where: { companyId: company.id } }),

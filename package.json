@@ -18,6 +18,7 @@
     "postinstall": "prisma generate",
     "smoke": "tsx --env-file=.env scripts/smoke.ts",
     "inspect": "tsx --env-file=.env scripts/inspect.ts",
+    "verify:case": "tsx --env-file=.env scripts/verify-case.ts",
     "setup:env": "tsx scripts/setup-env.ts"
   },
   "dependencies": {

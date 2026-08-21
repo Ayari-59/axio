@@ -14,7 +14,7 @@ budgets, indicateurs, cockpit, alertes et copilote.
 npm install
 cp .env.example .env    # puis renseignez DATABASE_URL, DIRECT_URL et AUTH_SECRET
 npx prisma db push      # crée le schéma dans PostgreSQL
-npm run db:seed         # 3 entreprises de démonstration, 18 mois de données
+npm run db:seed         # 4 entreprises de démonstration, 18 mois de données
 npm run dev             # http://localhost:3020
 ```
 
@@ -29,13 +29,20 @@ Compte de démonstration : **demo@axio.fr** / **Pilotage2026!**
 | Delta Conseil | services facturés au temps | missions, feuilles de temps, taux d'occupation, TJM |
 | Nordmeca | production d'unités | produits, ateliers, heures machine, coût unitaire, rebut |
 | Bâtir Atlantique | affaires à l'avancement | chantiers, avancement, reste à engager, marge à terminaison |
+| Atelier Lumen | production d'unités — **cas d'école** | mêmes moteurs, chiffres calculables de tête ([parcours guidé](docs/19-cas-pratique.md)) |
+
+Les trois premières imitent le désordre du réel. **Atelier Lumen** fait l'inverse : ses montants
+sont choisis pour tomber juste, afin qu'on puisse vérifier à la main ce que l'écran affiche. Son
+intérêt pédagogique tient en une phrase : au coût complet classique, le lustre paraît très
+rentable ; en ABC, il est vendu à perte.
 
 ## Vérifier que ça marche
 
 ```bash
 npm test                # 144 tests : moteurs, cas d'école DCG, garde-fous d'architecture
-npm run inspect 2026-03 # sorties chiffrées des trois entreprises, en ligne de commande
-npm run smoke           # les 64 routes de l'application répondent (dev server requis)
+npm run inspect 2026-03 # sorties chiffrées des quatre entreprises, en ligne de commande
+npm run verify:case     # les 22 chiffres du parcours guidé, contrôlés sur la vraie base
+npm run smoke           # les 84 routes de l'application répondent (dev server requis)
 npm run build           # build de production
 ```
 
@@ -60,13 +67,13 @@ MOTEURS DE CALCUL (purs, testables, sans I/O)
 
 | Dossier | Rôle |
 |---|---|
-| `docs/` | les 18 livrables de conception (vision → critères d'acceptation) |
+| `docs/` | les 18 livrables de conception (vision → critères d'acceptation) + guides |
 | `src/core/` | moteurs **purs** : aucune dépendance à Prisma, Next, au réseau ou à l'horloge |
 | `src/core/templates/` | packs de règles sectoriels, catalogue de vocabulaire, plan de comptes — **de la donnée** |
 | `src/lib/`, `src/services/` | persistance, session, orchestration, fournisseur IA |
 | `src/app/` | interface (App Router, RSC + Server Actions) |
 | `tests/` | 144 tests dont les cas d'école du contrôle de gestion |
-| `scripts/` | inspection, test de fumée |
+| `scripts/` | inspection, test de fumée, vérification du cas d'école |
 | `exemples/` | export comptable d'exemple à importer |
 
 ## Principes non négociables
@@ -108,7 +115,8 @@ configuration sont du texte JSON validé par Zod. Les passer en `Jsonb` et les m
 
 | Variable | Rôle | Défaut |
 |---|---|---|
-| `DATABASE_URL` | base de données | `file:./prisma/dev.db` |
+| `DATABASE_URL` | base PostgreSQL, endpoint `-pooler` | requis |
+| `DIRECT_URL` | endpoint direct, pour la CLI Prisma | requis |
 | `AUTH_SECRET` | signature des sessions | requis |
 | `AI_PROVIDER` | `local` (déterministe) ou `anthropic` | `local` |
 | `ANTHROPIC_API_KEY` | clé du fournisseur de rédaction | vide |
@@ -168,6 +176,7 @@ Points qui ont coûté du temps et qu'il ne faut pas refaire :
 | [16 — Stratégie de tests](docs/16-strategie-de-tests.md) | niveaux, invariants, couverture |
 | [17 — Critères d'acceptation](docs/17-criteres-acceptation.md) | 14 critères vérifiables |
 | [18 — Alimenter la base](docs/18-alimenter-la-base.md) | format CSV attendu, inducteurs, attributs, scripts |
+| [19 — Cas pratique](docs/19-cas-pratique.md) | parcours guidé « Atelier Lumen », chaque chiffre vérifiable à la main |
 
 ## Limites connues du MVP
 
