@@ -42,9 +42,22 @@ function createPool(): Pool {
 function createClient(): PrismaClient {
   const pool = globalForPrisma.pool ?? createPool();
   if (process.env.NODE_ENV !== "production") globalForPrisma.pool = pool;
-  return new PrismaClient({ adapter: new PrismaPg(pool) });
+  const client = new PrismaClient({ adapter: new PrismaPg(pool) });
+  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  return client;
 }
 
-export const prisma: PrismaClient = globalForPrisma.prisma ?? createClient();
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+/**
+ * Connexion **paresseuse** : le pool n'est créé qu'à la première requête réelle.
+ *
+ * Sans cela, importer ce module suffirait à exiger `DATABASE_URL` — et un build
+ * (qui collecte les données de pages sans jamais interroger la base) échouerait avec un
+ * message opaque au lieu d'une erreur claire à la première requête.
+ */
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, property, receiver) {
+    const client = globalForPrisma.prisma ?? createClient();
+    const value = Reflect.get(client as object, property, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+});
