@@ -12,10 +12,15 @@ budgets, indicateurs, cockpit, alertes et copilote.
 
 ```bash
 npm install
-npx prisma db push      # crée prisma/dev.db (SQLite, aucune infrastructure requise)
+cp .env.example .env    # puis renseignez DATABASE_URL, DIRECT_URL et AUTH_SECRET
+npx prisma db push      # crée le schéma dans PostgreSQL
 npm run db:seed         # 3 entreprises de démonstration, 18 mois de données
 npm run dev             # http://localhost:3020
 ```
+
+La base est **PostgreSQL** (Neon). `DATABASE_URL` pointe sur l'endpoint `-pooler` (utilisé par
+l'application), `DIRECT_URL` sur l'endpoint direct (utilisé par la CLI Prisma : le pooler ne
+supporte pas les opérations de schéma).
 
 Compte de démonstration : **demo@axio.fr** / **Pilotage2026!**
 
@@ -89,12 +94,12 @@ MOTEURS DE CALCUL (purs, testables, sans I/O)
 
 ## Stack
 
-Next.js 16 · React 19 · TypeScript strict · Tailwind 4 · Prisma 7 · SQLite (dev) → PostgreSQL (prod)
-· Zod 4 · Vitest · graphiques SVG maison · session JWT maison (`jose` + `bcryptjs`).
+Next.js 16 · React 19 · TypeScript strict · Tailwind 4 · Prisma 7 · PostgreSQL (Neon) · Zod 4 ·
+Vitest · graphiques SVG maison · session JWT maison (`jose` + `bcryptjs`).
 
-Passage en production : changer `provider` dans `prisma/schema.prisma`, remplacer l'adaptateur dans
-`src/lib/db.ts` par `@prisma/adapter-pg`, migrer les 6 colonnes JSON de `String` vers `Jsonb`.
-Aucun fichier de `src/core/` n'est concerné (cf. `docs/02-architecture-technique.md` §2.1).
+Le schéma reste volontairement portable : pas d'`enum` ni de `Json` Prisma, les six colonnes de
+configuration sont du texte JSON validé par Zod. Les passer en `Jsonb` et les montants en
+`Decimal(18,4)` est une optimisation ultérieure, sans impact sur `src/core/`.
 
 ## Variables d'environnement
 
@@ -137,5 +142,6 @@ Aucun fichier de `src/core/` n'est concerné (cf. `docs/02-architecture-techniqu
 - Budget : construction depuis l'historique uniquement (grille de saisie en V1).
 - Écarts sur charges indirectes (3 écarts) : moteur livré et testé, écran dédié en V1.
 - Import : CSV uniquement (Excel natif en V1) ; le mapping n'est pas encore mémorisé.
-- Base de développement : SQLite. Les décimaux sont des `Float` arrondis explicitement ;
-  la production exige PostgreSQL et des `Decimal`.
+- Les montants sont des `Float` arrondis explicitement par `core/model/money.ts` (conservation
+  de la masse vérifiée par test). Le passage en `Decimal(18,4)` est prévu avant la mise en
+  production réelle.

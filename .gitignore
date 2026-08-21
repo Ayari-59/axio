@@ -5,9 +5,7 @@ build/
 *.log
 .env
 .env.local
-prisma/dev.db
-prisma/dev.db-journal
-prisma/*.db*
+.vercel/
 .DS_Store
 coverage/
 tsconfig.tsbuildinfo

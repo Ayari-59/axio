@@ -20,7 +20,7 @@
                 │ interfaces de dépôt (ports)
 ┌───────────────▼──────────────────────────────────────────────┐
 │ PERSISTANCE — lib/repositories + Prisma                       │
-│  SQLite (dev) → PostgreSQL / Neon (prod), même schéma logique │
+│  PostgreSQL / Neon — schéma portable (ni enum, ni Json natifs)│
 └──────────────────────────────────────────────────────────────┘
                 ▲
 ┌───────────────┴──────────────────────────────────────────────┐
@@ -39,24 +39,36 @@
 | Graphiques | SVG maison (`components/charts`) | Zéro dépendance, thème light/dark maîtrisé, pas de risque React 19 |
 | Validation | Zod 4 | Frontière entrée/sortie, parsing des blobs JSON de configuration |
 | ORM | Prisma 7 | Convention maison ; adaptateurs de driver |
-| Base dev | SQLite via `@prisma/adapter-better-sqlite3` | MVP exécutable hors ligne, sans Docker ni serveur |
-| Base prod | PostgreSQL / Neon via `@prisma/adapter-pg` | Convention maison (cf. Dirigeant Optimizer, BTP Pilote) |
+| Base | PostgreSQL (Neon) via `@prisma/adapter-pg` | Convention maison (cf. Dirigeant Optimizer, BTP Pilote) ; le serverless interdit un fichier local |
 | Auth | Session maison (JWT `jose` + cookie httpOnly, `bcryptjs`) | Évite les pièges NextAuth listés sur les projets précédents |
 | Tests | Vitest | Le cœur est pur, donc testable sans base |
 | IA | `AI_PROVIDER=local|anthropic` | L'application est **complète sans clé d'API** |
 
-### 2.1 Portabilité SQLite → PostgreSQL
+### 2.1 Portabilité du schéma
 
-Le schéma est écrit de façon portable :
+Le schéma reste écrit de façon portable, même sur PostgreSQL — c'est ce qui a permis la bascule
+depuis SQLite (base du premier MVP) sans toucher une ligne de `core/` :
 
 - pas d'`enum` Prisma (SQLite ne les supporte pas) : `String` + unions TypeScript + Zod ;
 - pas de `Json` Prisma : colonnes `String` contenant du JSON, lues via `parseJson(schema, value)` ;
 - pas de tableaux natifs ;
-- décimaux : `Float` en dev, `Decimal(18,4)` en production (arrondi bancaire centralisé dans
-  `core/model/money.ts` — toute somme monétaire passe par `round2`).
+- décimaux : `Float`, avec arrondi centralisé dans `core/model/money.ts` (toute somme monétaire
+  passe par `round2`, et les répartitions conservent la masse au centime).
 
-Migration prod : changer `provider`, changer l'adaptateur, passer `String` → `Jsonb` sur les
-6 colonnes de configuration. Aucune ligne de `core/**` n'est touchée.
+Optimisations restantes, sans impact sur `core/**` : passer les 6 colonnes de configuration en
+`Jsonb` et les montants en `Decimal(18,4)`.
+
+### 2.2 Connexion Neon
+
+Deux URL distinctes, et c'est structurant :
+- `DATABASE_URL` — endpoint `-pooler`, utilisé par l'application (le serverless ouvre beaucoup
+  de connexions courtes) ;
+- `DIRECT_URL` — endpoint direct, utilisé par la CLI Prisma : le pooler ne supporte pas les
+  opérations de schéma (`db push`, `migrate`).
+
+Le pool est réglé pour le réveil d'un compute Neon en veille (≈ 7,5 s) : `connectionTimeoutMillis`
+à 15 s, `idleTimeoutMillis` à 10 s (inférieur à la coupure serveur), `keepAlive` actif et un
+listener `error` sur le pool — sans lui, une socket morte fait tomber le processus.
 
 ## 3. Principes structurants
 
@@ -168,7 +180,8 @@ Cible MVP : 200 000 écritures par entreprise, recalcul complet < 3 s.
 
 | Variable | Rôle | Défaut |
 |---|---|---|
-| `DATABASE_URL` | `file:./dev.db` (SQLite) ou URL Postgres | `file:./prisma/dev.db` |
+| `DATABASE_URL` | PostgreSQL, endpoint `-pooler` | requis |
+| `DIRECT_URL` | PostgreSQL, endpoint direct (CLI Prisma) | requis |
 | `AUTH_SECRET` | Signature des sessions | requis (généré à l'install) |
 | `AI_PROVIDER` | `local` ou `anthropic` | `local` |
 | `ANTHROPIC_API_KEY` | Clé du fournisseur IA | vide |

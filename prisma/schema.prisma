@@ -1,9 +1,11 @@
-// Axio — schéma portable (SQLite en dev, PostgreSQL en production).
-// Contraintes de portabilité assumées (cf. docs/04-schema-base-de-donnees.md) :
+// Axio — schéma PostgreSQL (Neon).
+// Contraintes de portabilité conservées (cf. docs/04-schema-base-de-donnees.md) :
 //  - aucun enum Prisma  → String + unions TypeScript validées par Zod
 //  - aucun type Json    → String contenant du JSON, validé par Zod à la lecture
 //  - aucun tableau natif
-//  - Float en dev       → Decimal(18,4) en production
+// Ces choix rendent le schéma lisible par n'importe quel moteur ; le passage des colonnes
+// JSON en Jsonb et des Float en Decimal(18,4) est une optimisation ultérieure, sans impact
+// sur src/core.
 
 generator client {
   provider = "prisma-client"
@@ -11,7 +13,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
 }
 
 model Organization {

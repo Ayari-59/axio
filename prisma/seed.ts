@@ -10,15 +10,19 @@
  * exactement les mêmes chiffres (condition des tests de non-régression numérique).
  */
 
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import bcrypt from "bcryptjs";
 import { businessModelProfileSchema, type BusinessModelProfile } from "../src/core/model/profile";
 import { applyConfiguration, buildConfigurationPlan, ensurePeriods } from "../src/services/configuration.service";
 import { createBudgetFromHistory } from "../src/services/budget.service";
 
-const adapter = new PrismaBetterSqlite3({ url: process.env.DATABASE_URL ?? "file:./prisma/dev.db" });
-const prisma = new PrismaClient({ adapter });
+const pool = new Pool({
+  connectionString: process.env.DIRECT_URL ?? process.env.DATABASE_URL,
+  connectionTimeoutMillis: 20_000,
+});
+const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 // ---------------------------------------------------------------- utilitaires
 
