@@ -111,6 +111,32 @@ configuration sont du texte JSON validé par Zod. Les passer en `Jsonb` et les m
 | `ANTHROPIC_API_KEY` | clé du fournisseur de rédaction | vide |
 | `AI_MODEL` | modèle utilisé | `claude-sonnet-5` |
 
+## Déploiement
+
+Hébergement **Vercel**, base **Neon** (PostgreSQL, région Frankfurt).
+
+| Élément | Valeur |
+|---|---|
+| Dépôt lié | `Ayari-59/axio`, branche de production `main` |
+| Framework preset | Next.js · Root Directory `./` · commandes par défaut |
+| Base | projet Neon `axio` — l'intégration Vercel injecte `DATABASE_URL` (pooler) et `DATABASE_URL_UNPOOLED` |
+| Variables à ajouter à la main | `DIRECT_URL` (endpoint direct) et `AUTH_SECRET` |
+| Protection | Vercel Authentication sur les **previews** seulement ; l'URL de production est ouverte, l'application exigeant sa propre connexion |
+
+Points qui ont coûté du temps et qu'il ne faut pas refaire :
+
+1. **Le schéma doit exister avant la première visite.** `npx prisma db push` puis `npm run db:seed`,
+   exécutés en local contre Neon — le déploiement ne crée aucune table.
+2. **Deux URL, pas une.** Le pooler ne supporte pas les opérations de schéma : `prisma db push`
+   passe par `DIRECT_URL`, l'application par `DATABASE_URL`. Les deux ne diffèrent que par
+   `-pooler` dans le nom d'hôte ; `npm run setup:env` déduit l'une de l'autre.
+3. **Ne pas cocher « Sensitive »** sur les variables : elles deviennent illisibles ensuite, y
+   compris en CLI, et il faut les supprimer pour les corriger.
+4. **Une modification de variable ne redéploie pas.** Il faut relancer un build.
+5. **Vercel Authentication est active par défaut** et renvoie un 302 vers le portail Vercel sur
+   toutes les URL — un symptôme qui ressemble à une panne applicative alors que l'application
+   n'a jamais été atteinte.
+
 ## Documentation
 
 | Document | Contenu |
