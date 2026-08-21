@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { detectDelimiter, parseCsv, parseDate, parseNumber, periodCodeFromDate } from "@/core/import/csv";
-import { memberCodeFrom, profileColumns, suggestMapping, transformRow } from "@/core/import/mapping";
+import {
+  memberCodeFrom,
+  profileColumns,
+  readBehavior,
+  readTraceability,
+  suggestMapping,
+  transformRow,
+} from "@/core/import/mapping";
 import { matchAccount } from "@/core/templates/accounts";
 import { runQualityChecks } from "@/core/quality/checks";
 import { cost, dataset, dimension, member, period, revenue } from "./fixtures/builders";
@@ -136,6 +143,34 @@ describe("mapping assisté", () => {
     const result = transformRow(["", "606100", "x", "", "", "", ""], { mapping });
     expect(result.ok).toBe(false);
     expect(result.error).toContain("Date");
+  });
+
+  it("lit les colonnes de classement en français et refuse d'inventer une valeur", () => {
+    expect(readBehavior("Fixe")).toBe("FIXED");
+    expect(readBehavior("variable")).toBe("VARIABLE");
+    expect(readBehavior("Semi-variable")).toBe("SEMI_VARIABLE");
+    expect(readBehavior("mixte")).toBe("SEMI_VARIABLE");
+    expect(readTraceability("Directe")).toBe("DIRECT");
+    expect(readTraceability("INDIRECT")).toBe("INDIRECT");
+
+    // Une valeur non reconnue ne doit JAMAIS être écrite telle quelle en base.
+    expect(readBehavior("n'importe quoi")).toBeUndefined();
+    expect(readTraceability("")).toBeUndefined();
+    expect(readBehavior(undefined)).toBeUndefined();
+  });
+
+  it("retombe sur le plan de comptes quand la colonne de classement est illisible", () => {
+    const mapping = {
+      columns: [
+        ...suggestions.map((s) => ({ column: s.column, index: s.index, target: s.target })),
+        { column: "Comportement", index: 7, target: "behavior" as const },
+      ],
+      defaults: {},
+      createMissingMembers: true,
+    };
+    const accountDefaults = () => ({ behavior: "VARIABLE" as const, traceability: "DIRECT" as const });
+    const result = transformRow([...csv.rows[0], "bidon"], { mapping, accountDefaults });
+    expect(result.entry?.behavior).toBe("VARIABLE");
   });
 
   it("normalise les codes de membres", () => {

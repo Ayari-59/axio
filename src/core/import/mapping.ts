@@ -1,4 +1,5 @@
 import { detectColumnType, parseDate, parseNumber, periodCodeFromDate } from "./csv";
+import type { CostBehavior, Traceability } from "../model/enums";
 import type { CoreDimension } from "../model/types";
 import { DIMENSION_SYNONYMS } from "../templates/vocabulary";
 
@@ -83,6 +84,8 @@ const KEYWORDS: { target: MappingTarget; words: string[]; type?: ColumnProfile["
   { target: "label", words: ["libelle", "description", "intitule", "objet", "commentaire"] },
   { target: "account", words: ["compte", "num compte", "compte general", "numero de compte"] },
   { target: "kind", words: ["sens", "type", "nature ecriture", "flux"] },
+  { target: "behavior", words: ["comportement", "fixe variable", "variabilite", "type de cout"] },
+  { target: "traceability", words: ["tracabilite", "direct indirect", "affectation", "imputation"] },
 ];
 
 
@@ -249,12 +252,12 @@ export function transformRow(row: string[], options: TransformOptions): ImportRo
       label: get("label")?.trim() ?? "",
       accountNumber,
       behavior:
-        (get("behavior")?.trim().toUpperCase() as "FIXED" | "VARIABLE" | "SEMI_VARIABLE" | undefined) ??
+        readBehavior(get("behavior")) ??
         defaults?.behavior ??
         mapping.defaults.behavior ??
         (quantity ? "VARIABLE" : "FIXED"),
       traceability:
-        (get("traceability")?.trim().toUpperCase() as "DIRECT" | "INDIRECT" | undefined) ??
+        readTraceability(get("traceability")) ??
         defaults?.traceability ??
         mapping.defaults.traceability ??
         (Object.keys(dims).some((code) => code !== "NATURE" && code !== "CENTER")
@@ -263,6 +266,62 @@ export function transformRow(row: string[], options: TransformOptions): ImportRo
       dims,
     },
   };
+}
+
+/**
+ * Lecture des colonnes de classement.
+ * Une valeur non reconnue retourne `undefined` — jamais une valeur inventée écrite en base :
+ * on retombe alors sur le plan de comptes, puis sur le repli documenté (docs/07 §2).
+ */
+const BEHAVIOR_ALIASES: Record<string, CostBehavior> = {
+  FIXED: "FIXED",
+  FIXE: "FIXED",
+  F: "FIXED",
+  "COUT FIXE": "FIXED",
+  STRUCTURE: "FIXED",
+  VARIABLE: "VARIABLE",
+  V: "VARIABLE",
+  "COUT VARIABLE": "VARIABLE",
+  PROPORTIONNEL: "VARIABLE",
+  SEMI_VARIABLE: "SEMI_VARIABLE",
+  "SEMI VARIABLE": "SEMI_VARIABLE",
+  SEMIVARIABLE: "SEMI_VARIABLE",
+  MIXTE: "SEMI_VARIABLE",
+  SV: "SEMI_VARIABLE",
+};
+
+const TRACEABILITY_ALIASES: Record<string, Traceability> = {
+  DIRECT: "DIRECT",
+  DIRECTE: "DIRECT",
+  D: "DIRECT",
+  AFFECTABLE: "DIRECT",
+  INDIRECT: "INDIRECT",
+  INDIRECTE: "INDIRECT",
+  I: "INDIRECT",
+  REPARTI: "INDIRECT",
+};
+
+function normalizeValue(raw: string | undefined): string | null {
+  if (!raw || raw.trim() === "") return null;
+  return raw
+    .trim()
+    .toUpperCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^A-Z0-9]+/g, " ")
+    .trim();
+}
+
+export function readBehavior(raw: string | undefined): CostBehavior | undefined {
+  const value = normalizeValue(raw);
+  if (!value) return undefined;
+  return BEHAVIOR_ALIASES[value] ?? BEHAVIOR_ALIASES[value.replace(/ /g, "_")];
+}
+
+export function readTraceability(raw: string | undefined): Traceability | undefined {
+  const value = normalizeValue(raw);
+  if (!value) return undefined;
+  return TRACEABILITY_ALIASES[value];
 }
 
 function parseOptionalNumber(raw: string | undefined): number | null {

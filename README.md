@@ -128,6 +128,7 @@ Aucun fichier de `src/core/` n'est concerné (cf. `docs/02-architecture-techniqu
 | [15 — Roadmap](docs/15-roadmap.md) | MVP → V1 → V2 → V3, risques |
 | [16 — Stratégie de tests](docs/16-strategie-de-tests.md) | niveaux, invariants, couverture |
 | [17 — Critères d'acceptation](docs/17-criteres-acceptation.md) | 14 critères vérifiables |
+| [18 — Alimenter la base](docs/18-alimenter-la-base.md) | format CSV attendu, inducteurs, attributs, scripts |
 
 ## Limites connues du MVP
 
