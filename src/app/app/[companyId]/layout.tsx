@@ -5,6 +5,7 @@ import { getCompany, loadConfiguration } from "@/lib/repository";
 import { prisma } from "@/lib/db";
 import { logoutAction } from "@/app/(auth)/actions";
 import { NavLink } from "./nav-link";
+import { Logo } from "@/components/brand";
 
 export default async function CompanyLayout({
   children,
@@ -62,9 +63,7 @@ export default async function CompanyLayout({
       >
         <div className="px-4 py-4">
           <Link href="/app" className="flex items-center gap-2">
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white font-bold">
-              A
-            </span>
+            <Logo size={32} className="text-brand-600 shrink-0" />
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate">{company.name}</p>
               <p className="muted text-xs truncate">{company.activity || "Axio"}</p>

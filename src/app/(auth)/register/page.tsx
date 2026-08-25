@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { registerAction, type AuthState } from "../actions";
+import { Logo } from "@/components/brand";
 
 export default function RegisterPage() {
   const [state, action, pending] = useActionState<AuthState, FormData>(registerAction, {});
@@ -11,9 +12,7 @@ export default function RegisterPage() {
     <main className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
         <Link href="/" className="flex items-center gap-2 mb-8">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white font-bold">
-            A
-          </span>
+          <Logo size={32} className="text-brand-600" />
           <span className="font-semibold tracking-tight">Axio</span>
         </Link>
 

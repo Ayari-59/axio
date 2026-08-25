@@ -1,3 +1,5 @@
+<img src="public/logo.svg" alt="Axio" height="32">
+
 # Axio — l'Operating System du contrôle de gestion
 
 Plateforme SaaS générique de contrôle de gestion : elle analyse le **modèle économique** d'une

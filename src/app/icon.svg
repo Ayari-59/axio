@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Axio">
+  <!--
+    Marque Axio. Un A géométrique, dessiné au trait plutôt que composé avec une police :
+    il reste identique partout, sans dépendre des fontes installées.
+
+    Deux contraintes ont commandé le dessin, dans cet ordre :
+    1. rester lisible à 16 px — la taille d'un favicon dans un onglet ;
+    2. rester reconnaissable en un dixième de seconde parmi vingt onglets.
+    Un premier dessin (trois axes divergeant d'une origine, plus proche de la doctrine du produit)
+    a été abandonné : à 16 px les trois traits fusionnaient en une tache. Vérifié au rendu.
+  -->
+  <rect width="32" height="32" rx="7.5" fill="#2547d6" />
+  <g stroke="#ffffff" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M9.2 23.2 L16 8.8 L22.8 23.2" />
+    <path d="M11.6 19.6 L20.4 19.6" />
+  </g>
+</svg>

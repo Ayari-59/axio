@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 132 32" width="132" height="32" role="img" aria-label="Axio">
+  <!--
+    Verrou de marque horizontal : marque + nom. Destiné aux surfaces hors application
+    (README, documents, aperçus sociaux). Dans l'application, le nom est du vrai texte —
+    voir src/components/brand.tsx.
+  -->
+  <rect width="32" height="32" rx="7.5" fill="#2547d6" />
+  <g stroke="#ffffff" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M9.2 23.2 L16 8.8 L22.8 23.2" />
+    <path d="M11.6 19.6 L20.4 19.6" />
+  </g>
+  <text
+    x="42"
+    y="22.2"
+    fill="#161b22"
+    font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    font-size="19"
+    font-weight="600"
+    letter-spacing="-0.4"
+  >Axio</text>
+</svg>

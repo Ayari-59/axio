@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { SECTORS } from "@/core/templates";
+import { Logo } from "@/components/brand";
 
 export default async function LandingPage() {
   const user = await getCurrentUser();
@@ -11,9 +12,7 @@ export default async function LandingPage() {
     <main className="min-h-screen">
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-brand-600 text-white font-bold">
-            A
-          </span>
+          <Logo size={32} className="text-brand-600" />
           <span className="font-semibold tracking-tight">Axio</span>
         </div>
         <nav className="flex items-center gap-3 text-sm">
