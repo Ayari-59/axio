@@ -1,28 +1,49 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink-50: #f6f7f9;
-  --color-ink-100: #eceef2;
-  --color-ink-200: #d5dae2;
-  --color-ink-300: #b0b9c7;
-  --color-ink-400: #7d8899;
-  --color-ink-500: #5b6678;
-  --color-ink-600: #454f5f;
-  --color-ink-700: #363e4b;
-  --color-ink-800: #232a34;
-  --color-ink-900: #161b22;
-  --color-ink-950: #0d1117;
+  /* Fontes : un display à empattements (Fraunces) pour les titres, un grotesque
+   * (Sora) pour l'interface. Les variables sont injectées par next/font (layout). */
+  --font-sans: var(--font-sora), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
 
+  /* Neutres « bleu nuit » : la même échelle de gris, mais tirée vers le bleu
+   * marine, pour que fonds, bordures et textes s'accordent à la teinte de marque. */
+  --color-ink-50: #f5f7fb;
+  --color-ink-100: #e9edf5;
+  --color-ink-200: #d3dbe8;
+  --color-ink-300: #b0bcd0;
+  --color-ink-400: #7d8aa4;
+  --color-ink-500: #5a6780;
+  --color-ink-600: #454f66;
+  --color-ink-700: #353d51;
+  --color-ink-800: #212a3f;
+  --color-ink-900: #141b2c;
+  --color-ink-950: #0b1120;
+
+  /* Marque : cobalt. Le 600 reste #2547d6 — c'est l'encre du logo et du favicon,
+   * qui doivent rester identiques (voir src/app/icon.svg). */
   --color-brand-50: #eef4ff;
-  --color-brand-100: #dbe6ff;
-  --color-brand-200: #bed2ff;
-  --color-brand-300: #92b3ff;
-  --color-brand-400: #5f88fb;
-  --color-brand-500: #3a63f0;
+  --color-brand-100: #dbe7ff;
+  --color-brand-200: #bcd3ff;
+  --color-brand-300: #8fb6ff;
+  --color-brand-400: #5f90fb;
+  --color-brand-500: #3f6ff2;
   --color-brand-600: #2547d6;
-  --color-brand-700: #1e37ab;
-  --color-brand-800: #1d3187;
-  --color-brand-900: #1d2d6b;
+  --color-brand-700: #1e39ac;
+  --color-brand-800: #1d3389;
+  --color-brand-900: #1c2d6b;
+
+  /* Accent : orange. La couleur de l'action et des chiffres qui comptent. */
+  --color-accent-50: #fff4ec;
+  --color-accent-100: #ffe4d1;
+  --color-accent-200: #ffcba6;
+  --color-accent-300: #ffab73;
+  --color-accent-400: #ff9450;
+  --color-accent-500: #ff8a3d;
+  --color-accent-600: #f2741a;
+  --color-accent-700: #d65a08;
+  --color-accent-800: #a9470c;
+  --color-accent-900: #7c3410;
 
   --color-good-500: #12855f;
   --color-good-100: #d8f2e6;
@@ -34,20 +55,22 @@
 
 :root {
   --surface: #ffffff;
-  --surface-muted: #f6f7f9;
-  --border: #e3e7ee;
-  --text: #161b22;
-  --text-muted: #5b6678;
+  --surface-muted: #f3f6fc;
+  --border: #e4e8f2;
+  --text: #101a33;
+  --text-muted: #58637d;
+  --card-shadow: 0 1px 2px rgba(16, 26, 51, 0.05), 0 14px 34px -22px rgba(16, 26, 51, 0.22);
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --surface: #161b22;
-    --surface-muted: #0d1117;
-    --border: #2a323d;
-    --text: #eceef2;
-    --text-muted: #9aa5b5;
+    --surface: #0c1c3e;
+    --surface-muted: #060e22;
+    --border: #1f3358;
+    --text: #eaf1ff;
+    --text-muted: #93a4c6;
+    --card-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 20px 44px -26px rgba(0, 0, 0, 0.72);
     color-scheme: dark;
   }
 }
@@ -59,9 +82,15 @@ body {
 }
 
 body {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+  font-family: var(--font-sans, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Titres de tête : le display à empattements porte l'identité. Réservé au h1
+ * (accroche de la landing, en-tête de page) — les h2/h3 restent en grotesque. */
+h1 {
+  font-family: var(--font-display, Georgia, serif);
+  letter-spacing: -0.015em;
 }
 
 .tabular {
@@ -71,11 +100,20 @@ body {
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 0.9rem;
+  box-shadow: var(--card-shadow);
 }
 
 .muted {
   color: var(--text-muted);
+}
+
+/* Halo d'accueil : un dégradé radial cobalt + orange, très diffus, posé en haut
+ * de la landing. Décoratif — n'ajoute aucun contenu, ne gêne aucun clic. */
+.landing-aura {
+  background:
+    radial-gradient(72% 55% at 12% -8%, color-mix(in srgb, var(--color-brand-500) 20%, transparent), transparent 60%),
+    radial-gradient(56% 46% at 106% -12%, color-mix(in srgb, var(--color-accent-500) 15%, transparent), transparent 55%);
 }
 
 .divide-border > * + * {

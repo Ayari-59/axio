@@ -43,7 +43,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={pending}
-            className="w-full rounded-lg bg-brand-600 text-white font-medium py-2.5 disabled:opacity-60"
+            className="w-full rounded-lg bg-accent-500 text-ink-950 font-medium py-2.5 hover:bg-accent-600 disabled:opacity-60"
           >
             {pending ? "Création…" : "Créer mon compte"}
           </button>

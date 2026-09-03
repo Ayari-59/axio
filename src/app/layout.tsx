@@ -1,5 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import { Fraunces, Sora } from "next/font/google";
 import "./globals.css";
+
+// Fraunces porte les titres (h1) ; Sora, tout le reste. next/font héberge les
+// fichiers au build : pas de requête vers Google au chargement, pas de saut de
+// mise en page. Les variables sont lues par globals.css (--font-display, --font-sans).
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  weight: ["500", "600", "700"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const sora = Sora({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-sora",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -18,13 +36,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0d1117" },
+    { media: "(prefers-color-scheme: dark)", color: "#060e22" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr">
+    <html lang="fr" className={`${sora.variable} ${fraunces.variable}`}>
       <body>{children}</body>
     </html>
   );
