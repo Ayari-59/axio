@@ -9,7 +9,7 @@ export default async function LandingPage() {
   if (user) redirect("/app");
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen landing-aura">
       <header className="max-w-6xl mx-auto px-6 py-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Logo size={32} className="text-brand-600" />
@@ -19,7 +19,7 @@ export default async function LandingPage() {
           <Link href="/login" className="px-3 py-2 rounded-lg hover:bg-ink-100">
             Se connecter
           </Link>
-          <Link href="/register" className="px-3.5 py-2 rounded-lg bg-brand-600 text-white font-medium">
+          <Link href="/register" className="px-3.5 py-2 rounded-lg bg-accent-500 text-ink-950 font-medium hover:bg-accent-600">
             Créer un compte
           </Link>
         </nav>
@@ -38,7 +38,7 @@ export default async function LandingPage() {
           indicateurs et son cockpit — sans paramétrage technique.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/register" className="px-5 py-3 rounded-lg bg-brand-600 text-white font-medium">
+          <Link href="/register" className="px-5 py-3 rounded-lg bg-accent-500 text-ink-950 font-medium hover:bg-accent-600">
             Configurer mon entreprise
           </Link>
           <Link href="/login" className="px-5 py-3 rounded-lg border font-medium">

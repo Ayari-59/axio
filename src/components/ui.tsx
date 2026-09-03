@@ -155,7 +155,8 @@ function buttonClass(variant: "primary" | "secondary" | "ghost" | "danger"): str
     "inline-flex items-center justify-center gap-2 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap";
   switch (variant) {
     case "primary":
-      return `${base} bg-brand-600 text-white hover:bg-brand-700`;
+      // L'orange porte l'action ; l'encre reste sombre pour le contraste sur l'accent vif.
+      return `${base} bg-accent-500 text-ink-950 hover:bg-accent-600`;
     case "danger":
       return `${base} bg-bad-500 text-white hover:opacity-90`;
     case "ghost":
