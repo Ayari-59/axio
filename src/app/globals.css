@@ -33,17 +33,19 @@
   --color-brand-800: #1d3389;
   --color-brand-900: #1c2d6b;
 
-  /* Accent : orange. La couleur de l'action et des chiffres qui comptent. */
-  --color-accent-50: #fff4ec;
-  --color-accent-100: #ffe4d1;
-  --color-accent-200: #ffcba6;
-  --color-accent-300: #ffab73;
-  --color-accent-400: #ff9450;
-  --color-accent-500: #ff8a3d;
-  --color-accent-600: #f2741a;
-  --color-accent-700: #d65a08;
-  --color-accent-800: #a9470c;
-  --color-accent-900: #7c3410;
+  /* Accent : or vif (jaune éclatant). La couleur de l'action et des chiffres
+   * qui comptent. L'encre des boutons reste sombre (text-ink-950), donc l'or
+   * clair reste parfaitement lisible. */
+  --color-accent-50: #fffbec;
+  --color-accent-100: #fff4d0;
+  --color-accent-200: #ffe8a4;
+  --color-accent-300: #ffdb70;
+  --color-accent-400: #ffce44;
+  --color-accent-500: #ffc21e;
+  --color-accent-600: #f2ac05;
+  --color-accent-700: #cc8d04;
+  --color-accent-800: #8a5d04;
+  --color-accent-900: #6d4a06;
 
   --color-good-500: #12855f;
   --color-good-100: #d8f2e6;
