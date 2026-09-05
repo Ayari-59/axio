@@ -250,8 +250,12 @@ function evaluateCall(ast: Extract<Ast, { type: "call" }>, context: FormulaConte
     case "round": {
       const [value, digits] = numbers;
       if (value === undefined) return null;
-      const factor = 10 ** (digits ?? 0);
-      return Math.round(value * factor) / factor;
+      // `10 ** digits` déborde vers Infinity (digits ≳ 309) ou s'annule vers 0
+      // (digits ≲ -324) : on borne l'exposant pour garder un facteur fini non nul,
+      // puis on garde le résultat sous la garantie du module (jamais NaN/Infinity).
+      const factor = 10 ** Math.max(-300, Math.min(digits ?? 0, 300));
+      const result = Math.round(value * factor) / factor;
+      return Number.isFinite(result) ? result : null;
     }
     default:
       return null;
