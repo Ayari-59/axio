@@ -15,8 +15,11 @@ export function round2(value: number): number {
 
 export function roundN(value: number, digits: number): number {
   if (!Number.isFinite(value)) return 0;
-  const f = 10 ** digits;
-  return Math.round((value + Number.EPSILON) * f) / f;
+  // Exposant borné : au-delà, `10 ** digits` déborde (Infinity) ou s'annule (0)
+  // et fabrique un NaN. On retombe alors sur la valeur finie d'origine.
+  const f = 10 ** Math.max(-300, Math.min(Math.trunc(digits), 300));
+  const r = Math.round((value + Number.EPSILON) * f) / f;
+  return Number.isFinite(r) ? r : value;
 }
 
 /** Division protégée : retourne null au lieu de NaN/Infinity. */

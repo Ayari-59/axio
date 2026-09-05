@@ -38,6 +38,13 @@ describe("analyseur de formules", () => {
     expect(evaluateFormula("revenue / 0", ctx({ revenue: 100 }))).toBeNull();
     expect(evaluateFormula("revenue / missing", ctx({ revenue: 100 }))).toBeNull();
     expect(evaluateFormula("missing * 2", ctx({}))).toBeNull();
+    // round() ne doit jamais laisser fuir un NaN quand l'exposant déborde
+    // (10 ** 400 = Infinity) ou s'annule (10 ** -400 = 0). Arrondir à 400
+    // décimales laisse 100 inchangé ; le cas négatif reste au moins fini.
+    expect(evaluateFormula("round(revenue, 400)", ctx({ revenue: 100 }))).toBe(100);
+    expect(Number.isNaN(evaluateFormula("round(revenue, 0 - 400)", ctx({ revenue: 100 })))).toBe(
+      false,
+    );
   });
 
   it("refuse les formules invalides", () => {

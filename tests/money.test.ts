@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { allocateProportional, pctChange, round2, safeDiv, sum } from "@/core/model/money";
+import { allocateProportional, pctChange, round2, roundN, safeDiv, sum } from "@/core/model/money";
 
 describe("arithmétique monétaire", () => {
   it("arrondit au centime", () => {
@@ -13,6 +13,11 @@ describe("arithmétique monétaire", () => {
     expect(round2(Number.POSITIVE_INFINITY)).toBe(0);
     expect(safeDiv(1, 0)).toBeNull();
     expect(safeDiv(null, 2)).toBeNull();
+    // roundN : un exposant démesuré ferait déborder 10 ** digits (→ NaN) ;
+    // on borne l'exposant et on retombe au pire sur une valeur finie.
+    expect(roundN(12.345, 2)).toBe(12.35);
+    expect(Number.isNaN(roundN(100, 400))).toBe(false);
+    expect(Number.isNaN(roundN(100, -400))).toBe(false);
   });
 
   it("calcule une variation relative protégée", () => {
