@@ -76,7 +76,7 @@ export function OnboardingWizard({
         <div>
           <h1 className="text-xl font-semibold tracking-tight">Configuration de {companyName}</h1>
           <p className="muted text-sm mt-1">
-            Cinq écrans suffisent : le moteur en déduit vos axes, vos coûts, vos indicateurs et votre cockpit.
+            5 écrans pour configurer le moteur.
           </p>
         </div>
         <span className="muted text-sm whitespace-nowrap">
@@ -101,8 +101,7 @@ export function OnboardingWizard({
           <>
             <h2 className="font-semibold">Votre entreprise</h2>
             <p className="muted text-sm">
-              Secteur retenu : <strong>{sectorLabel}</strong>. Il sélectionne un jeu de règles ; les étapes
-              suivantes l&apos;affinent et peuvent en activer d&apos;autres.
+              Secteur : <strong>{sectorLabel}</strong>. Les étapes suivantes affinent la configuration.
             </p>
             <label className="block">
               <span className="block text-sm font-medium mb-1">Activité</span>
@@ -167,7 +166,7 @@ export function OnboardingWizard({
           <>
             <h2 className="font-semibold">Comment gagnez-vous de l&apos;argent ?</h2>
             <p className="muted text-sm">
-              C&apos;est l&apos;écran le plus important : il pilote le moteur de coûts et le choix des méthodes.
+              L&apos;écran central du moteur de coûts.
             </p>
 
             <fieldset>
@@ -296,7 +295,7 @@ export function OnboardingWizard({
           <>
             <h2 className="font-semibold">Comment êtes-vous organisé ?</h2>
             <p className="muted text-sm">
-              Ces unités deviendront vos centres de responsabilité. Vous pourrez les compléter par import.
+              Centres de responsabilité — complétez par import.
             </p>
             <div className="space-y-3">
               {ORG_UNIT_TYPES.map((type) => {
@@ -350,8 +349,7 @@ export function OnboardingWizard({
           <>
             <h2 className="font-semibold">Que voulez-vous piloter ?</h2>
             <p className="muted text-sm">
-              Chaque objet coché devient un axe d&apos;analyse. Renommez-le avec votre vocabulaire : c&apos;est
-              ce libellé qui s&apos;affichera partout.
+              Axes d&apos;analyse — renommez avec votre vocabulaire.
             </p>
             <div className="space-y-3">
               {PILOT_OBJECTS.map((object) => {
@@ -387,7 +385,7 @@ export function OnboardingWizard({
           <>
             <h2 className="font-semibold">Vos priorités</h2>
             <p className="muted text-sm">
-              Trois priorités maximum : elles déterminent l&apos;ordre des sections de votre cockpit.
+              Jusqu&apos;à 3 priorités pour le cockpit.
             </p>
             <div className="grid gap-2 sm:grid-cols-2">
               {OBJECTIVES.map((objective) => {

@@ -46,7 +46,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
     <div>
       <PageHeader
         title="Paramètres"
-        description="Profil économique, axes d'analyse, configuration versionnée et journal d'audit."
+        description="Profil, axes d'analyse, versioning et audit."
         action={<LinkButton href={`${base}/onboarding`} variant="primary">Modifier le profil</LinkButton>}
       />
 
@@ -104,7 +104,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
 
         <Card
           title="Axes d'analyse"
-          subtitle="Le vocabulaire est le vôtre : « chantier », « mission » ou « produit » ne sont que des libellés"
+          subtitle="Libellés personnalisables — adaptez à votre vocabulaire"
           action={
             <div className="flex gap-3">
               <Link href={`${base}/settings/rules`} className="text-xs text-brand-600">
@@ -133,7 +133,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
       <Card
         className="mt-5"
         title="Pourquoi ce système de pilotage ?"
-        subtitle="Trace complète : chaque élément de configuration est relié à la règle qui l'a produit"
+        subtitle="Chaque élément est relié à sa règle"
       >
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -173,7 +173,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
       </Card>
 
       <div className="grid gap-5 xl:grid-cols-2 mt-5">
-        <Card title="Versions de configuration" subtitle="Immuables : une reconfiguration crée une version, elle n'écrase rien">
+        <Card title="Versions de configuration" subtitle="Immuables — les changements créent une version">
           <Table headers={["Version", "Date", "Note"]}>
             {versions.map((version) => (
               <tr key={version.id}>
@@ -185,7 +185,7 @@ export default async function SettingsPage({ params }: { params: Promise<{ compa
           </Table>
         </Card>
 
-        <Card title="Journal d'audit" subtitle="Toute mutation sensible est tracée">
+        <Card title="Journal d'audit" subtitle="Traçabilité des changements">
           <Table headers={["Action", "Entité", "Date"]}>
             {audits.map((entry) => (
               <tr key={entry.id}>
