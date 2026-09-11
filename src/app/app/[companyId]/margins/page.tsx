@@ -36,7 +36,7 @@ export default async function MarginsPage({
     <div>
       <PageHeader
         title="Marges et rentabilité"
-        description="Cascade de marge de l'entreprise, puis rentabilité par objet de coût. La marge contributive répond à « faut-il continuer ? », la marge opérationnelle à « la structure est-elle couverte ? »."
+        description="Cascade de marge et rentabilité par objet de coût."
         action={<PeriodSelector periods={snapshot.periodCodes} current={snapshot.periodCode} />}
       />
 
@@ -87,8 +87,7 @@ export default async function MarginsPage({
             </div>
           </dl>
           <p className="muted text-xs mt-3">
-            Une baisse d&apos;activité de {percent(snapshot.breakEven.safetyMarginRate)} ramène l&apos;entreprise
-            au point mort ; au-delà, le résultat devient négatif.
+            Baisse de {percent(snapshot.breakEven.safetyMarginRate)} avant point mort.
           </p>
         </Card>
       </div>
@@ -112,7 +111,7 @@ export default async function MarginsPage({
         {result ? (
           <Card
             title={`Rentabilité par ${snapshot.dataset.dimensions.find((d) => d.code === active)?.label.toLowerCase()}`}
-            subtitle="Coûts directs affectés, indirects répartis selon vos règles d'affectation"
+            subtitle="Directs affectés, indirects répartis"
             action={
               <a
                 href={`${base}/export?type=margins&dim=${active}&period=${snapshot.periodCode}`}
@@ -232,8 +231,7 @@ export default async function MarginsPage({
               </ul>
             )}
             <p className="muted text-xs mt-4">
-              Une marge contributive négative signifie que l&apos;objet ne couvre pas ses propres coûts :
-              son arrêt améliorerait le résultat, à charges fixes de structure inchangées.
+              Marge négative = l&apos;objet ne couvre pas ses coûts directs.
             </p>
           </Card>
         </div>

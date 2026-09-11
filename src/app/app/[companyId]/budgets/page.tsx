@@ -34,10 +34,10 @@ export default async function BudgetsPage({ params }: { params: Promise<{ compan
     <div>
       <PageHeader
         title="Budgets"
-        description="Un budget approuvé est immuable : toute modification crée une nouvelle version, et l'historique reste consultable."
+        description="Un budget approuvé est immuable ; les modifications créent une version."
       />
 
-      <Card title="Construire un budget depuis l'historique" subtitle="Le réel de l'exercice source est projeté mois par mois, saisonnalité conservée">
+      <Card title="Construire un budget depuis l'historique" subtitle="Projection mensuelle du réel conservant saisonnalité">
         <NewBudgetForm companyId={companyId} years={years} />
       </Card>
 
@@ -91,20 +91,16 @@ export default async function BudgetsPage({ params }: { params: Promise<{ compan
       <Card className="mt-5" title="Ce que le budget débloque">
         <ul className="text-sm space-y-2 muted">
           <li>
-            <strong className="text-current">Écarts</strong> — comparaison réel / budget / N-1 avec sens
-            favorable ou défavorable par nature.
+            <strong className="text-current">Écarts</strong> — réel / budget / N-1 avec sens favorable/défavorable.
           </li>
           <li>
-            <strong className="text-current">Décomposition prix / volume / composition</strong> — possible dès
-            que les lignes budgétaires portent une quantité et un prix unitaire.
+            <strong className="text-current">Décomposition prix / volume / mix</strong> — si quantité et prix unitaire.
           </li>
           <li>
-            <strong className="text-current">Budget flexible</strong> — le budget est ramené au niveau
-            d&apos;activité réel pour distinguer un écart de dépense d&apos;un écart de volume.
+            <strong className="text-current">Budget flexible</strong> — ramené au niveau d&apos;activité réel.
           </li>
           <li>
-            <strong className="text-current">Alertes budgétaires</strong> — dépassement constaté et
-            consommation plus rapide que l&apos;avancement.
+            <strong className="text-current">Alertes</strong> — dépassement et consommation vs avancement.
           </li>
         </ul>
         <p className="muted text-xs mt-4">

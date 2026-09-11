@@ -50,7 +50,7 @@ export default async function KpisPage({
     <div>
       <PageHeader
         title="Indicateurs"
-        description="Les indicateurs sont des données, pas du code : leur formule est écrite sur les mesures du moteur, et le mode pédagogique explique définition, calcul, interprétation et limites."
+        description="Des données, pas du code : formule, calcul, interprétation et limites expliqués."
         action={
           <div className="flex items-center gap-4">
             <a
@@ -98,8 +98,7 @@ export default async function KpisPage({
 
                   {kpi.status === "missing_data" && (
                     <p className="text-xs text-warn-500 mt-2">
-                      Mesures absentes : {kpi.missingMeasures.join(", ")}. Importez ou saisissez ces données
-                      pour activer l&apos;indicateur.
+                      Manque : {kpi.missingMeasures.join(", ")}.
                     </p>
                   )}
 
@@ -142,8 +141,8 @@ export default async function KpisPage({
 
       <Card
         className="mt-8"
-        title="Indicateurs du catalogue non retenus"
-        subtitle="Ils n'ont pas été proposés pour votre modèle économique — ils le seront si votre profil change"
+        title="Indicateurs non retenus"
+        subtitle="Proposés si votre profil change"
       >
         <div className="flex flex-wrap gap-2">
           {notSelected.map((spec) => (
