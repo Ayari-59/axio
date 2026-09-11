@@ -50,7 +50,7 @@ export default async function RulesPage({ params }: { params: Promise<{ companyI
     <div>
       <PageHeader
         title="Règles d'affectation"
-        description="Le cheminement des charges est entièrement paramétrable : source, méthode, inducteur et ordre. Chaque modification est immédiatement reflétée dans les coûts et les marges."
+        description="Paramétrez le cheminement des charges — modifications immédiatement reflétées."
         action={
           <a href={`/app/${companyId}/settings/activities`} className="text-sm text-brand-600">
             Comptabilité par activités →
@@ -132,7 +132,7 @@ export default async function RulesPage({ params }: { params: Promise<{ companyI
         })}
       </div>
 
-      <Card className="mt-5" title="Effet du paramétrage" subtitle="Période analysée : le total affecté doit toujours égaler le total des charges">
+      <Card className="mt-5" title="Effet du paramétrage" subtitle="Total affecté = total des charges">
         <dl className="grid gap-4 sm:grid-cols-4 text-sm">
           <div>
             <dt className="muted text-xs">Charges de la période</dt>
