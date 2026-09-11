@@ -35,7 +35,7 @@ export default async function VariancesPage({
         <PageHeader title="Analyse des écarts" />
         <EmptyState
           title="Aucun budget de référence"
-          description="Construisez un budget — depuis l'historique en deux clics — pour comparer le réel au budget et décomposer les écarts."
+          description="Créez un budget pour analyser les écarts."
           action={<LinkButton href={`${base}/budgets`} variant="primary">Construire un budget</LinkButton>}
         />
       </div>
@@ -61,7 +61,7 @@ export default async function VariancesPage({
     <div>
       <PageHeader
         title="Analyse des écarts"
-        description={`Réel de ${periodLabel(snapshot.periodCode)} comparé au budget « ${view.budget.name} », puis décomposition des causes.`}
+        description="Réel vs budget et décomposition."
         action={<PeriodSelector periods={snapshot.periodCodes} current={snapshot.periodCode} />}
       />
 
@@ -118,9 +118,7 @@ export default async function VariancesPage({
                 ))}
               </Table>
               <p className="muted text-xs mt-3">
-                Prix = Σ Q<sub>réel</sub>(P<sub>réel</sub> − P<sub>budget</sub>) · Volume = (Q<sub>réel</sub> −
-                Q<sub>budget</sub>) × prix moyen budgété · Mix = effet de déformation de la composition des ventes.
-                Prix moyen budgété : {money(view.pvm.averageBudgetPrice)}.
+                Prix = Σ Q<sub>réel</sub>(P<sub>réel</sub> − P<sub>budget</sub>) · Volume = variation quantité · Mix = composition. Prix moyen : {money(view.pvm.averageBudgetPrice)}.
               </p>
             </div>
           </div>
@@ -162,7 +160,7 @@ export default async function VariancesPage({
         <Card
           className="mt-5"
           title="Qui explique la variation ?"
-          subtitle={`${measureLabel(analysisMeasure)} — ${periodLabel(snapshot.periodCode)} vs ${periodLabel(snapshot.previousPeriodCode ?? "")}`}
+          subtitle={measureLabel(analysisMeasure)}
           action={
             <div className="flex gap-1.5">
               {costObjects.map((dimension) => (
