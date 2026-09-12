@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fondamentaux : Comptabilité générale</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background: #f9f9f9;
+        }
+        h1 { color: #0066cc; border-bottom: 3px solid #0066cc; padding-bottom: 15px; }
+        h2 { color: #004499; margin-top: 30px; }
+        h3 { color: #006699; }
+        .concept { background: white; padding: 20px; margin: 20px 0; border-radius: 4px; border-left: 4px solid #0066cc; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .formula { background: #f0f7ff; padding: 15px; border-radius: 4px; font-family: monospace; margin: 15px 0; }
+        .example { background: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background: #0066cc; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .highlight { background: #ffffcc; }
+    </style>
+</head>
+<body>
+    <h1>📚 Fondamentaux : Comptabilité générale</h1>
+
+    <div class="concept">
+        <h2>1. Le principe de la double-entrée</h2>
+        <p>La comptabilité en <strong>double-entrée</strong> est le fondement de tous les systèmes comptables modernes.</p>
+
+        <h3>Règle fondamentale</h3>
+        <div class="formula">
+            Débits = Crédits
+            <br><br>Chaque opération est enregistrée deux fois :
+            <br>- Une fois au débit d'un compte
+            <br>- Une fois au crédit d'un autre compte
+        </div>
+
+        <p><strong>Pourquoi ?</strong> Cela garantit l'équilibre comptable et permet un contrôle auditif automatique.</p>
+
+        <div class="example">
+            <strong>Exemple :</strong> Vente de marchandise 100 € payée en espèces
+            <table>
+                <tr>
+                    <th>Compte</th>
+                    <th>Débit</th>
+                    <th>Crédit</th>
+                </tr>
+                <tr>
+                    <td>Caisse (1010)</td>
+                    <td class="highlight">100 €</td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td>Ventes (7010)</td>
+                    <td></td>
+                    <td class="highlight">100 €</td>
+                </tr>
+                <tr style="font-weight: bold; background: #e6f0ff;">
+                    <td>Total</td>
+                    <td>100 €</td>
+                    <td>100 €</td>
+                </tr>
+            </table>
+            ✅ Débits (100) = Crédits (100) → Équilibre respecté
+        </div>
+    </div>
+
+    <div class="concept">
+        <h2>2. Comptes et classification</h2>
+
+        <h3>Structure du plan de comptes français (PCG)</h3>
+        <table>
+            <tr>
+                <th>Classe</th>
+                <th>Type</th>
+                <th>Exemple</th>
+            </tr>
+            <tr>
+                <td><strong>1</strong></td>
+                <td>Capitaux (actif stable)</td>
+                <td>Capital social, Réserves</td>
+            </tr>
+            <tr>
+                <td><strong>2</strong></td>
+                <td>Immobilisations</td>
+                <td>Bâtiments, Équipements, Brevets</td>
+            </tr>
+            <tr>
+                <td><strong>3</strong></td>
+                <td>Stocks</td>
+                <td>Matières, Produits finis</td>
+            </tr>
+            <tr>
+                <td><strong>4</strong></td>
+                <td>Tiers (créances/dettes)</td>
+                <td>Clients, Fournisseurs, TVA</td>
+            </tr>
+            <tr>
+                <td><strong>5</strong></td>
+                <td>Trésorerie</td>
+                <td>Banque, Caisse, Chèques</td>
+            </tr>
+            <tr>
+                <td><strong>6</strong></td>
+                <td>Charges</td>
+                <td>Salaires, Achats, Loyer</td>
+            </tr>
+            <tr>
+                <td><strong>7</strong></td>
+                <td>Produits (revenus)</td>
+                <td>Ventes, Services, Intérêts</td>
+            </tr>
+        </table>
+
+        <h3>Mécanique débit/crédit par type</h3>
+        <table>
+            <tr>
+                <th>Type de compte</th>
+                <th>Augmente en</th>
+                <th>Diminue en</th>
+            </tr>
+            <tr>
+                <td>Actif (1-5, sauf 4 tiers)</td>
+                <td>Débit</td>
+                <td>Crédit</td>
+            </tr>
+            <tr>
+                <td>Passif (1 capital, 4 dettes)</td>
+                <td>Crédit</td>
+                <td>Débit</td>
+            </tr>
+            <tr>
+                <td>Charges (6)</td>
+                <td>Débit</td>
+                <td>Crédit</td>
+            </tr>
+            <tr>
+                <td>Produits (7)</td>
+                <td>Crédit</td>
+                <td>Débit</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="concept">
+        <h2>3. La balance comptable</h2>
+        <p>La <strong>balance</strong> est la liste de tous les comptes avec leurs soldes débits et crédits.</p>
+
+        <div class="formula">
+            Propriété : Somme débits = Somme crédits
+            <br><br>Cette égalité doit TOUJOURS être vérifiée.
+            <br>Si elle n'est pas respectée, il y a une erreur de saisie.
+        </div>
+
+        <h3>Exemple de balance (simplifié)</h3>
+        <table>
+            <tr>
+                <th>Compte</th>
+                <th>Libellé</th>
+                <th>Débit</th>
+                <th>Crédit</th>
+            </tr>
+            <tr>
+                <td>1012</td>
+                <td>Capital social</td>
+                <td></td>
+                <td>10 000</td>
+            </tr>
+            <tr>
+                <td>1015</td>
+                <td>Réserves</td>
+                <td></td>
+                <td>2 000</td>
+            </tr>
+            <tr>
+                <td>1020</td>
+                <td>Compte bancaire</td>
+                <td>8 000</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>4010</td>
+                <td>Clients</td>
+                <td>5 000</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>6010</td>
+                <td>Achats</td>
+                <td>3 000</td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>7010</td>
+                <td>Ventes</td>
+                <td></td>
+                <td>12 000</td>
+            </tr>
+            <tr style="font-weight: bold; background: #e6f0ff;">
+                <td colspan="2"><strong>TOTAL</strong></td>
+                <td>16 000</td>
+                <td>24 000</td>
+            </tr>
+        </table>
+
+        <p style="color: red;"><strong>❌ Problème :</strong> 16 000 ≠ 24 000. La balance ne s'équilibre pas.</p>
+        <p><em>Action : Rechercher l'erreur de saisie.</em></p>
+    </div>
+
+    <div class="concept">
+        <h2>4. Documents comptables clés</h2>
+
+        <h3>Journal comptable</h3>
+        <p>Registre chronologique de toutes les opérations. Chaque ligne = 1 pièce comptable.</p>
+
+        <h3>Grand livre</h3>
+        <p>Regroupe toutes les écritures par compte. Montre le mouvement complet (débits + crédits) d'un compte.</p>
+
+        <h3>Compte de résultat (P&L)</h3>
+        <div class="formula">
+            Résultat = Produits - Charges
+            <br><br>Exemple :
+            <br>Ventes (7010) : 100 000 €
+            <br>Achats (6010) : -40 000 €
+            <br>Salaires (6020) : -30 000 €
+            <br>= Bénéfice : 30 000 €
+        </div>
+
+        <h3>Bilan</h3>
+        <div class="formula">
+            Actif = Passif + Capitaux propres
+            <br><br>Actif : Banque, Clients, Stocks
+            <br>Passif : Dettes fournisseurs
+            <br>Capitaux : Capital + Réserves + Résultat
+        </div>
+    </div>
+
+    <div class="concept">
+        <h2>5. TVA (Taxe sur la Valeur Ajoutée)</h2>
+
+        <h3>Mécanisme</h3>
+        <ul>
+            <li><strong>TVA collectée (4457) :</strong> Taxe qu'on facture aux clients</li>
+            <li><strong>TVA déductible (4566, 4562) :</strong> Taxe qu'on a payée aux fournisseurs</li>
+            <li><strong>TVA à décaisser :</strong> TVA collectée - TVA déductible</li>
+        </ul>
+
+        <div class="example">
+            <strong>Exemple :</strong> Achat + Vente
+            <br>
+            <table style="margin-top: 10px;">
+                <tr>
+                    <th>Opération</th>
+                    <th>Montant HT</th>
+                    <th>TVA 20%</th>
+                    <th>Total TTC</th>
+                    <th>Impact compte TVA</th>
+                </tr>
+                <tr>
+                    <td>Achat fournisseur</td>
+                    <td>100 €</td>
+                    <td>20 €</td>
+                    <td>120 €</td>
+                    <td>+20 € crédit (4566)</td>
+                </tr>
+                <tr>
+                    <td>Vente client</td>
+                    <td>200 €</td>
+                    <td>40 €</td>
+                    <td>240 €</td>
+                    <td>+40 € débit (4457)</td>
+                </tr>
+                <tr style="font-weight: bold; background: #fff0f0;">
+                    <td colspan="4"><strong>TVA à décaisser</strong></td>
+                    <td>40 - 20 = <strong>20 €</strong></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="concept">
+        <h2>6. Pièces justificatives</h2>
+        <p>Chaque écriture comptable doit être justifiée par un document :</p>
+        <ul>
+            <li><strong>Facture client :</strong> Justifie une vente</li>
+            <li><strong>Facture fournisseur :</strong> Justifie un achat</li>
+            <li><strong>Relevé bancaire :</strong> Justifie les opérations de trésorerie</li>
+            <li><strong>Bulletin de paie :</strong> Justifie les salaires</li>
+            <li><strong>Contrats, bons de commande, etc.</strong></li>
+        </ul>
+        <p><strong>Règle d'or :</strong> Pas de pièce comptable sans justification. L'auditeur doit pouvoir tracer chaque euro.</p>
+    </div>
+
+    <div class="concept">
+        <h2>✅ Résumé des règles clés</h2>
+        <ul style="line-height: 2;">
+            <li>✓ Débits = Crédits (toujours)</li>
+            <li>✓ Chaque opération a deux côtés</li>
+            <li>✓ Chaque pièce doit être justifiée</li>
+            <li>✓ La balance doit s'équilibrer</li>
+            <li>✓ TVA collectée ≠ TVA déductible (à gérer mensuellement)</li>
+            <li>✓ Les erreurs sont corrigées par des pièces inversées, jamais par modification</li>
+        </ul>
+    </div>
+</body>
+</html>

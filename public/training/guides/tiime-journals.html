@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiime : Maîtriser les 4 journaux</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background: #f9f9f9;
+        }
+        h1 { color: #0066cc; border-bottom: 3px solid #0066cc; padding-bottom: 15px; }
+        h2 { color: #004499; background: #e6f0ff; padding: 10px; border-radius: 4px; }
+        h3 { color: #006699; }
+        .journal-card { background: white; padding: 25px; margin: 25px 0; border-radius: 4px; border-left: 4px solid #0066cc; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .journal-card h2 { background: none; padding: 0; margin-top: 0; }
+        .usage { background: #f0f7ff; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .tip { background: #f5f9e6; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .warning { background: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ff9800; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background: #0066cc; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <h1>📖 Tiime : Maîtriser les 4 journaux</h1>
+
+    <div class="journal-card">
+        <h2>1. Journal de Ventes (VEN)</h2>
+        <p>Enregistre toutes les factures client et les avoirs (remises, retours).</p>
+
+        <div class="usage">
+            <strong>Quand l'utiliser :</strong> Dès que vous facturez un client
+        </div>
+
+        <h3>Structure d'une saisie</h3>
+        <table>
+            <tr>
+                <th>Champ</th>
+                <th>Valeur type</th>
+                <th>Explication</th>
+            </tr>
+            <tr>
+                <td>Date</td>
+                <td>2025-01-15</td>
+                <td>Date de la facture (période comptable)</td>
+            </tr>
+            <tr>
+                <td>Numéro pièce</td>
+                <td>FAC-001</td>
+                <td>Référence unique (facture, bon d'accès)</td>
+            </tr>
+            <tr>
+                <td>Client</td>
+                <td>Acme Corp</td>
+                <td>Sélectionnez ou créez le tiers</td>
+            </tr>
+            <tr>
+                <td>Compte débité</td>
+                <td>4010 (Clients)</td>
+                <td>Créance client (augmente l'actif)</td>
+            </tr>
+            <tr>
+                <td>Montant débit</td>
+                <td>1 000 €</td>
+                <td>Montant TTC de la facture</td>
+            </tr>
+            <tr>
+                <td>Compte crédité</td>
+                <td>7010 (Ventes)</td>
+                <td>Produit de l'activité</td>
+            </tr>
+            <tr>
+                <td>Montant crédit</td>
+                <td>1 000 €</td>
+                <td>Doit égaler le débit</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Conseil :</strong> En réalité, les ventes incluent souvent la TVA. Tiime décompose automatiquement en 3 lignes :
+            <br>- Débit Clients = TTC
+            <br>- Crédit Ventes = HT
+            <br>- Crédit TVA collectée = TVA
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Attention :</strong> Une facture non payée crée une créance (compte 4010 Clients). Le paiement ultérieur rapproche le client et la banque.
+        </div>
+    </div>
+
+    <div class="journal-card">
+        <h2>2. Journal d'Achats (ACH)</h2>
+        <p>Enregistre toutes les factures fournisseur et les avoirs fournisseur.</p>
+
+        <div class="usage">
+            <strong>Quand l'utiliser :</strong> Dès que vous recevez une facture fournisseur
+        </div>
+
+        <h3>Cas courants</h3>
+        <table>
+            <tr>
+                <th>Cas</th>
+                <th>Compte débité</th>
+                <th>Compte crédité</th>
+                <th>Montant</th>
+            </tr>
+            <tr>
+                <td>Achat matières premières</td>
+                <td>6010 (Achats)</td>
+                <td>2010 (Fournisseurs)</td>
+                <td>HT</td>
+            </tr>
+            <tr>
+                <td>Achat services (électricité, loyer)</td>
+                <td>6030 (Utilitaires)</td>
+                <td>2010 (Fournisseurs)</td>
+                <td>HT</td>
+            </tr>
+            <tr>
+                <td>Achat équipement (immo)</td>
+                <td>2013 (Équipement)</td>
+                <td>2010 (Fournisseurs)</td>
+                <td>HT</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Conseil :</strong> Tiime gère automatiquement la TVA déductible (4566 ou 4562 selon le type d'achat).
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Important :</strong> Les factures fournisseur impayées créent une dette (compte 2010 Fournisseurs). Vous avez une obligation de paiement.
+        </div>
+    </div>
+
+    <div class="journal-card">
+        <h2>3. Journal de Banque (BAN)</h2>
+        <p>Enregistre tous les mouvements de trésorerie : virements, chèques, prélèvements, remises.</p>
+
+        <div class="usage">
+            <strong>Quand l'utiliser :</strong> Chaque opération bancaire (paiement, reçu, frais)
+        </div>
+
+        <h3>Exemples courants</h3>
+        <table>
+            <tr>
+                <th>Opération</th>
+                <th>Débit (1020)</th>
+                <th>Crédit</th>
+                <th>Explication</th>
+            </tr>
+            <tr>
+                <td>Dépôt argent en banque</td>
+                <td>+ (reçu)</td>
+                <td>Caisse (1010)</td>
+                <td>La banque augmente</td>
+            </tr>
+            <tr>
+                <td>Paiement fournisseur</td>
+                <td>- (sorti)</td>
+                <td>Fournisseurs (2010)</td>
+                <td>Dépense + réduction dette</td>
+            </tr>
+            <tr>
+                <td>Encaissement client</td>
+                <td>+ (reçu)</td>
+                <td>Clients (4010)</td>
+                <td>Réduction créance client</td>
+            </tr>
+            <tr>
+                <td>Frais bancaires</td>
+                <td>- (sorti)</td>
+                <td>Frais (6050)</td>
+                <td>Charge du mois</td>
+            </tr>
+        </table>
+
+        <div class="tip">
+            <strong>💡 Conseil :</strong> Saisissez les opérations du relevé bancaire directement. Tiime propose un mode "rapprochement" pour lettrer automatiquement.
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Règle clé :</strong> Le total du compte Banque dans Tiime doit correspondre au solde du relevé bancaire. C'est le point de contrôle mensuel principal.
+        </div>
+    </div>
+
+    <div class="journal-card">
+        <h2>4. Journal Général (JG)</h2>
+        <p>Journal fourre-tout pour les écritures non-standard qui ne rentrent pas dans Ventes, Achats ou Banque.</p>
+
+        <div class="usage">
+            <strong>Quand l'utiliser :</strong> Écritures de régularisation, reclassements, corrections
+        </div>
+
+        <h3>Exemples</h3>
+        <ul>
+            <li><strong>Amortissement :</strong> Débit Charges (6800) / Crédit Amortissement (2801)</li>
+            <li><strong>Provision :</strong> Débit Charges (6900) / Crédit Provision (1910)</li>
+            <li><strong>Correction d'erreur :</strong> Pièce inverse de l'erreur</li>
+            <li><strong>Reclassement :</strong> Débit/Crédit de deux comptes sans créer de double charge</li>
+            <li><strong>Intérêts intercalaires :</strong> Débit Charges (6600) / Crédit Banque (1020)</li>
+        </ul>
+
+        <div class="warning">
+            <strong>⚠️ Attention :</strong> Le journal Général doit être utilisé avec parcimonie. Chaque écriture doit être justifiée par un document.
+        </div>
+    </div>
+
+    <div class="journal-card">
+        <h2>🎯 Workflow de saisie type</h2>
+        <ol style="font-size: 1.1em; line-height: 2;">
+            <li><strong>Lundi matin :</strong> Consulter la boîte mail et le suivi des commandes</li>
+            <li><strong>Mardi :</strong> Saisir les factures client de la semaine précédente (Journal Ventes)</li>
+            <li><strong>Mercredi :</strong> Saisir les factures fournisseur reçues (Journal Achats)</li>
+            <li><strong>Jeudi :</strong> Relever la banque et saisir les opérations (Journal Banque)</li>
+            <li><strong>Vendredi :</strong> Vérifier la balance (débits = crédits) et générer un rapport</li>
+            <li><strong>Fin de mois :</strong> Écritures de régularisation (Journal Général)</li>
+        </ol>
+    </div>
+
+    <div class="journal-card">
+        <h2>✅ Checklist de validation</h2>
+        <ul style="line-height: 2;">
+            <li>✓ Tous les journaux sont renseignés</li>
+            <li>✓ Les dates sont dans la bonne période comptable</li>
+            <li>✓ Chaque pièce a une référence unique</li>
+            <li>✓ Les débits égalent les crédits pour chaque ligne</li>
+            <li>✓ La balance générale équilibre (débits totaux = crédits totaux)</li>
+            <li>✓ La banque Tiime correspond au relevé réel</li>
+            <li>✓ Chaque opération est justifiée (facture, relevé, contrat)</li>
+        </ul>
+    </div>
+</body>
+</html>

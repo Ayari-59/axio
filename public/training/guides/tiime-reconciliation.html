@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiime : Rapprocher banque et comptabilité</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            color: #333;
+            background: #f9f9f9;
+        }
+        h1 { color: #0066cc; border-bottom: 3px solid #0066cc; padding-bottom: 15px; }
+        h2 { color: #004499; background: #e6f0ff; padding: 12px; border-radius: 4px; }
+        h3 { color: #006699; }
+        .section { background: white; padding: 25px; margin: 25px 0; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .step { background: #f0f7ff; padding: 15px; margin: 15px 0; border-left: 4px solid #0066cc; border-radius: 4px; }
+        .example { background: #f5f5f5; padding: 15px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .warning { background: #fff3cd; padding: 15px; margin: 15px 0; border-left: 4px solid #ff9800; border-radius: 4px; }
+        .tip { background: #e6f9ff; padding: 15px; margin: 15px 0; border-left: 4px solid #0066cc; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { padding: 12px; text-align: left; border: 1px solid #ddd; }
+        th { background: #0066cc; color: white; }
+        tr:nth-child(even) { background: #f9f9f9; }
+        .formula { background: #f0f7ff; padding: 15px; border-radius: 4px; font-family: monospace; margin: 15px 0; }
+        code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <h1>🏦 Tiime : Rapprocher banque et comptabilité</h1>
+
+    <div class="section">
+        <h2>Pourquoi rapprocher ?</h2>
+        <p>Le rapprochement bancaire (ou <em>réconciliation</em>) est le contrôle mensuels fondamental qui vérifiez que :</p>
+        <ul style="line-height: 2;">
+            <li>✓ Vos enregistrements comptables (Tiime) correspondent à votre relevé bancaire réel</li>
+            <li>✓ Aucune opération n'a été oubliée ou mal enregistrée</li>
+            <li>✓ Les chèques en attente de paiement sont suivis</li>
+            <li>✓ Votre trésorerie réelle est correctement pilotée</li>
+        </ul>
+        <p><strong>Fréquence :</strong> Chaque fin de mois, dès réception du relevé bancaire.</p>
+    </div>
+
+    <div class="section">
+        <h2>Les 3 différences possibles</h2>
+
+        <h3>1. Opérations en attente de débit/crédit</h3>
+        <p>Tiime enregistre une opération, mais la banque ne l'a pas encore traitée.</p>
+        <div class="example">
+            <strong>Exemple :</strong>
+            <br>- 15 janvier : Vous saisissez un virement à un fournisseur dans Tiime
+            <br>- 18 janvier : La banque débite effectivement le compte (délai de traitement)
+            <br>→ Du 15 au 17 janvier : Écart entre Tiime et le relevé
+        </div>
+
+        <h3>2. Frais bancaires non saisissables à l'avance</h3>
+        <p>La banque facture des frais que vous ne connaissiez pas à l'avance.</p>
+        <div class="example">
+            <strong>Exemple :</strong>
+            <br>- Tiime affiche : 10 000 € le 31 janvier
+            <br>- Relevé bancaire : 9 950 € (après frais mensuels de 50 €)
+            <br>→ Vous devez saisir les frais dans Tiime
+        </div>
+
+        <h3>3. Erreurs de saisie ou pièces perdues</h3>
+        <p>Un chèque reçu qui n'a pas été saisi, une opération enregistrée deux fois, etc.</p>
+
+        <div class="tip">
+            <strong>💡 À retenir :</strong> Les deux premiers cas sont normaux. Le troisième signale un problème à corriger.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Procédure de rapprochement pas à pas</h2>
+
+        <div class="step">
+            <h3>Étape 1 : Imprimer ou télécharger le relevé bancaire</h3>
+            <p>Accédez à votre compte bancaire et téléchargez le relevé du mois comptable (ex : janvier 1-31).</p>
+            <p><strong>Format :</strong> PDF, CSV, ou directement dans Tiime si l'intégration est activée.</p>
+        </div>
+
+        <div class="step">
+            <h3>Étape 2 : Consulter le compte Banque dans Tiime</h3>
+            <p>Allez dans <code>Comptabilité > Grand Livre</code> et consultez le compte <strong>1020 (Banque)</strong>.</p>
+            <p><strong>Information clé :</strong> Solde Tiime au 31 janvier = ?</p>
+        </div>
+
+        <div class="step">
+            <h3>Étape 3 : Comparer les soldes</h3>
+            <div class="formula">
+                Solde relevé bancaire au 31 janvier : X €
+                Solde Tiime compte 1020 au 31 janvier : Y €
+
+                Différence = X - Y
+            </div>
+            <p><strong>Si X = Y :</strong> Rapprochement réussi ✅</p>
+            <p><strong>Si X ≠ Y :</strong> Continuez aux étapes 4-5</p>
+        </div>
+
+        <div class="step">
+            <h3>Étape 4 : Identifier les opérations en attente</h3>
+            <p>Comparez ligne par ligne : relevé bancaire vs journal Tiime.</p>
+            <p>Cherchez :</p>
+            <ul>
+                <li>Les chèques émis mais pas encore débités (attendre)</li>
+                <li>Les virements effectués en attente (rarement &gt; 2 jours)</li>
+                <li>Les remises de chèques en cours d'encaissement</li>
+            </ul>
+            <div class="example">
+                <strong>Exemple :</strong>
+                <br>Relevé : Solde 10 000 €
+                <br>Tiime : Solde 9 500 € (car un chèque de 500 € a été saisi mais pas débité)
+                <br>→ Normal. Ré-rapprocher dans 2-3 jours.
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Étape 5 : Saisir les éléments manquants</h3>
+            <p>Les frais bancaires ou opérations inattendues trouvées dans le relevé doivent être saisies dans Tiime.</p>
+            <div class="example">
+                <strong>Exemple : Frais bancaires de 50 €</strong>
+                <br>→ Journal Banque :
+                <table style="margin: 10px 0;">
+                    <tr>
+                        <th>Compte débité</th>
+                        <th>Montant</th>
+                        <th>Compte crédité</th>
+                        <th>Montant</th>
+                    </tr>
+                    <tr>
+                        <td>6050 (Frais)</td>
+                        <td>50 €</td>
+                        <td>1020 (Banque)</td>
+                        <td>50 €</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>Étape 6 : Vérifier l'équilibre final</h3>
+            <p>Après saisie des éléments manquants, ré-consultez le compte Banque.</p>
+            <p><strong>Solde Tiime doit maintenant égaler le relevé ✅</strong></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Modèle de rapprochement (tableau)</h2>
+        <table>
+            <tr>
+                <th colspan="2" style="background: #0066cc;">Relevé bancaire</th>
+                <th colspan="2" style="background: #004499;">Tiime (Compte 1020)</th>
+            </tr>
+            <tr>
+                <th>Date</th>
+                <th>Montant</th>
+                <th>Date</th>
+                <th>Montant</th>
+            </tr>
+            <tr>
+                <td>31 jan - Virement client</td>
+                <td>+1 000</td>
+                <td>25 jan - Facture client</td>
+                <td>+1 000</td>
+            </tr>
+            <tr>
+                <td>30 jan - Chèque émis</td>
+                <td>-500</td>
+                <td>20 jan - Facture fournisseur</td>
+                <td>-500</td>
+            </tr>
+            <tr>
+                <td>31 jan - Frais mensuels</td>
+                <td>-50</td>
+                <td>(non saisi)</td>
+                <td>(à saisir)</td>
+            </tr>
+            <tr style="font-weight: bold; background: #e6f0ff;">
+                <td colspan="2">Solde relevé : 450 €</td>
+                <td colspan="2">Solde Tiime : 500 € (sans les frais)</td>
+            </tr>
+            <tr style="color: #d9534f;">
+                <td colspan="4"><strong>Écart : 50 € = frais manquants</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Cas pratiques courants</h2>
+
+        <h3>Cas 1 : Chèque reçu client, encaissement en attente</h3>
+        <div class="example">
+            <strong>Situation :</strong> Tiime saisit le chèque reçu le 25 janvier, mais le relevé ne le montre que le 28 janvier.
+            <br><strong>Action :</strong> C'est normal, cela s'appelle un <em>chèque en cours</em>. Pas d'action dans Tiime, ré-rapprocher le 28.
+        </div>
+
+        <h3>Cas 2 : Virement émis, délai de traitement</h3>
+        <div class="example">
+            <strong>Situation :</strong> Vous émettez un virement le 10 janvier, mais la banque le débite le 12 janvier.
+            <br><strong>Action :</strong> Normal (délai de traitement bancaire). Tiime et le relevé se rapprochent en 2-3 jours.
+        </div>
+
+        <h3>Cas 3 : Intérêts créditeurs inattendus</h3>
+        <div class="example">
+            <strong>Situation :</strong> Le relevé montre +15 € d'intérêts non saisissables à l'avance.
+            <br><strong>Action :</strong> Saisir dans Tiime :
+            <br>Débit 1020 (Banque) +15 €
+            <br>Crédit 7600 (Intérêts) +15 €
+        </div>
+
+        <h3>Cas 4 : Double saisie accidentelle</h3>
+        <div class="example">
+            <strong>Situation :</strong> Tiime affiche 20 000 €, relevé affiche 10 000 €. L'opération a été saisie deux fois.
+            <br><strong>Action :</strong> Créer une pièce inverse (même montant en sens inverse) pour annuler la double saisie.
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Checklist de rapprochement mensuel</h2>
+        <ul style="line-height: 2; font-size: 1.05em;">
+            <li>✓ Télécharger le relevé bancaire du mois</li>
+            <li>✓ Noter le solde d'ouverture (1er du mois)</li>
+            <li>✓ Noter le solde de clôture (dernier du mois)</li>
+            <li>✓ Consulter le compte 1020 dans Tiime (Grand Livre)</li>
+            <li>✓ Comparer solde Tiime = solde relevé</li>
+            <li>✓ Identifier les écarts (chèques en attente, frais, intérêts)</li>
+            <li>✓ Saisir les opérations manquantes</li>
+            <li>✓ Ré-vérifier que les soldes correspondent</li>
+            <li>✓ Clôturer le rapprochement dans Tiime (si fonction disponible)</li>
+            <li>✓ Archiver le relevé pour trace d'audit</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>🎯 En résumé</h2>
+        <div class="formula">
+            Solde Tiime = Solde Relevé
+            - Opérations en attente (chèques, virements)
+            + Frais/Intérêts non saisissables à l'avance
+
+            Après correction des éléments manquants :
+
+            Solde Tiime final = Solde Relevé final ✅
+        </div>
+    </div>
+</body>
+</html>

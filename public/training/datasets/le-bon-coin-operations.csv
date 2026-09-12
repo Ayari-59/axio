@@ -1,0 +1,9 @@
+Date,Type,Référence,Description,Compte Débité,Débit (€),Compte Crédité,Crédit (€),TVA (€),Notes
+2025-01-02,ACH,ACH-001,Achat café Caféa,6010 Achats,500,4566 TVA Déductible Matières,100,100,Fournisseur Caféa - Facture 500€ HT + 100€ TVA
+2025-01-03,VEN,VEN-001,Ventes comptoir espèces,1010 Caisse,600,7010 Ventes,500,100,Ventes comptoir 500€ HT + 100€ TVA
+2025-01-06,BAN,BAN-001,Salaires janvier,1020 Banque,1800,6020 Salaires,1500,Retenue cotisations 300€
+2025-01-08,ACH,ACH-002,Achat pâtes & farine Moulin Blanc,6010 Achats,300,2010 Fournisseurs,360,60,Facture Moulin Blanc 300€ HT + 60€ TVA - Non payée fin janvier
+2025-01-10,VEN,VEN-002,Ventes catering client restaurant,4010 Clients,960,7010 Ventes,800,160,Facture client #001 - 800€ HT + 160€ TVA 20%
+2025-01-15,BAN,BAN-002,Loyer janvier payé en espèces,6030 Loyer,800,1010 Caisse,800,,Paiement propriétaire - janvier
+2025-01-27,BAN,BAN-003,Paiement facture Moulin Blanc,2010 Fournisseurs,360,1020 Banque,360,,Règlement par virement de la facture du 08/01
+2025-01-31,VEN,VEN-003,Ventes comptoir espèces,1010 Caisse,950,7010 Ventes,792,158,Ventes comptoir 792€ HT + 158€ TVA
