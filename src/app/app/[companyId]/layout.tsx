@@ -50,6 +50,7 @@ export default async function CompanyLayout({
     { href: `${base}/kpis`, label: "Indicateurs", show: true },
     { href: `${base}/alerts`, label: "Alertes", show: true },
     { href: `${base}/reports`, label: "Rapports", show: true },
+    { href: `${base}/training`, label: "Formation", show: true },
     { href: `${base}/copilot`, label: "Copilote", show: true },
     { href: `${base}/data`, label: "Données", show: true },
     { href: `${base}/settings`, label: "Paramètres", show: true },

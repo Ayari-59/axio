@@ -39,7 +39,7 @@ export default async function CockpitPage({
         </p>
         <EmptyState
           title="Il manque vos données"
-          description="Importez un export comptable (CSV) ou chargez un jeu de démonstration pour voir le cockpit se remplir."
+          description="Importez des données (CSV ou démo) pour voir le cockpit."
           action={<LinkButton href={`${base}/data`} variant="primary">Importer des données</LinkButton>}
         />
       </div>
@@ -53,9 +53,7 @@ export default async function CockpitPage({
           <h1 className="text-xl font-semibold tracking-tight">
             {company.name} · {periodLabel(snapshot.periodCode)}
           </h1>
-          <p className="muted text-sm mt-1">
-            Cockpit composé automatiquement par le moteur de règles à partir de votre modèle économique.
-          </p>
+          <p className="muted text-sm mt-1">Composé par le moteur de règles d'après votre modèle.</p>
         </div>
         <div className="flex items-center gap-4">
           <Badge tone={snapshot.quality.confidence === "high" ? "good" : snapshot.quality.confidence === "medium" ? "warn" : "bad"}>
@@ -67,10 +65,7 @@ export default async function CockpitPage({
 
       {configured && (
         <div className="mb-5">
-          <Callout tone="good">
-            Configuration appliquée. Votre cockpit affiche uniquement ce qui concerne votre modèle économique —
-            les fonctions non pertinentes ne sont pas affichées.
-          </Callout>
+          <Callout tone="good">Configuration appliquée. Affichage adapté à votre modèle.</Callout>
         </div>
       )}
 
@@ -93,13 +88,12 @@ export default async function CockpitPage({
       </div>
 
       <p className="muted text-xs mt-10">
-        Chaque chiffre provient du moteur de calcul.{" "}
         <Link href={`${base}/copilot`} className="text-brand-600">
-          Poser une question au copilote
+          Copilote
         </Link>{" "}
         ·{" "}
         <Link href={`${base}/settings`} className="text-brand-600">
-          Comprendre pourquoi ce cockpit
+          Paramètres
         </Link>
       </p>
     </div>

@@ -55,7 +55,7 @@ export default async function CostsPage({
     <div>
       <PageHeader
         title="Coûts"
-        description="Classement, cheminement d'affectation et coût par objet. Chaque euro affecté conserve sa trace : le drill-down n'est pas une estimation."
+        description="Classement, affectation et traçabilité par objet. Drill-down en piste d'audit."
         action={<PeriodSelector periods={snapshot.periodCodes} current={snapshot.periodCode} />}
       />
 
@@ -79,7 +79,7 @@ export default async function CostsPage({
       </div>
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <Card title="Coûts par nature" subtitle="Les natures viennent des données, pas d'une liste figée">
+        <Card title="Coûts par nature" subtitle="Des données, pas d'une liste prédéfinie">
           <BarList
             items={natures.map((n) => ({
               label: n.label,
@@ -96,8 +96,7 @@ export default async function CostsPage({
           <BarList items={traceabilitySplit} />
           {(m.semiVariableCost ?? 0) > 0 && (
             <p className="muted text-xs mt-4">
-              {money(m.semiVariableCost ?? 0)} de charges semi-variables ont été décomposées par la méthode
-              des points extrêmes avant d&apos;être classées.
+              {money(m.semiVariableCost ?? 0)} semi-variables : points extrêmes.
             </p>
           )}
         </Card>
@@ -106,7 +105,7 @@ export default async function CostsPage({
       <Card
         className="mt-5"
         title="Centres de responsabilité"
-        subtitle="Charges indirectes rattachées puis redistribuées aux objets de coûts"
+        subtitle="Charges indirectes rattachées et redistribuées"
         action={
           <Link href={`${base}/settings/rules`} className="text-xs text-brand-600">
             Règles d&apos;affectation
@@ -135,7 +134,7 @@ export default async function CostsPage({
       <Card
         className="mt-5"
         title="Traces d'affectation"
-        subtitle="Piste d'audit : chaque montant affecté porte sa règle et sa base de répartition"
+        subtitle="Piste d'audit : règle et base de répartition"
         action={
           <a href={`${base}/export?type=allocations&period=${snapshot.periodCode}`} className="text-xs text-brand-600">
             Exporter en CSV
@@ -193,8 +192,7 @@ export default async function CostsPage({
           ))}
         </div>
         <p className="muted text-xs mt-3">
-          Les méthodes sont choisies par le moteur de règles selon votre modèle économique et votre maturité.
-          Elles se combinent : le même jeu d&apos;écritures alimente le coût variable et le coût complet.
+          Choisies par le moteur selon votre modèle ; elles se combinent pour coût variable et coût complet.
         </p>
       </Card>
     </div>

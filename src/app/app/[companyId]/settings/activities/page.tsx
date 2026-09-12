@@ -49,7 +49,7 @@ export default async function ActivitiesPage({
     <div>
       <PageHeader
         title="Comptabilité par activités"
-        description="Une activité n'est pas déductible d'un export comptable : c'est un choix de modélisation. Le moteur propose celles de votre modèle économique, avec leur inducteur — à vous de les ajuster."
+        description="Une activité est un choix de modélisation — ajustez les inducteurs proposés."
         action={
           map.configured ? (
             <form action={removeActivitiesAction.bind(null, companyId)}>
@@ -65,15 +65,12 @@ export default async function ActivitiesPage({
         <Callout tone={map.configured ? "good" : "brand"}>
           {map.configured ? (
             <>
-              Vos charges indirectes transitent par <strong>{map.activities.length} activités</strong> avant
-              d&apos;atteindre vos {dimensionLabel.toLowerCase()}s. Chaque activité descend avec son propre
-              inducteur — c&apos;est ce qui distingue l&apos;ABC d&apos;une clé de répartition unique.
+              Vos <strong>{map.activities.length} activités</strong> ont chacune leur propre
+              inducteur — c&apos;est ce qui distingue l&apos;ABC d&apos;une clé unique.
             </>
           ) : (
             <>
-              L&apos;ABC n&apos;est pas encore en place : vos charges indirectes descendent des centres
-              directement aux objets de coûts, avec une clé unique. La carte ci-dessous est une proposition
-              fondée sur votre modèle économique ; rien n&apos;est créé tant que vous ne la validez pas.
+              Proposition d&apos;ABC basée sur votre modèle — validez pour appliquer.
             </>
           )}
         </Callout>
@@ -90,8 +87,7 @@ export default async function ActivitiesPage({
         <div className="mt-5">
           <Callout tone="warn">
             Inducteurs sans données : <strong>{[...new Set(map.missingDrivers)].join(", ")}</strong>. Les
-            activités concernées ne pourront pas être réparties et leurs charges resteront visibles en « non
-            affecté » — jamais réparties au hasard.{" "}
+            activités concernées restent en « non affecté ».{" "}
             <Link href={`${base}/data`} className="underline">
               Saisir ces inducteurs
             </Link>
@@ -214,8 +210,7 @@ export default async function ActivitiesPage({
                 ))}
             </Table>
             <p className="muted text-xs mt-3">
-              Les centres se vident au profit des activités : c&apos;est le premier étage de l&apos;ABC. Le
-              détail euro par euro est consultable dans les{" "}
+              Les centres se vident au profit des activités (étape 1 de l&apos;ABC). Détail dans les{" "}
               <Link href={`${base}/costs`} className="text-brand-600">
                 traces d&apos;affectation
               </Link>

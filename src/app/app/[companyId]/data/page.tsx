@@ -47,7 +47,7 @@ export default async function DataPage({
     <div>
       <PageHeader
         title="Données"
-        description="Import, contrôle qualité et données statistiques. Rien n'est écrit avant validation, et tout lot importé reste annulable."
+        description="Import, qualité et statistiques. Annulable à tout moment."
       />
 
       {imported && (
@@ -57,7 +57,7 @@ export default async function DataPage({
       )}
 
       <div className="grid gap-5 xl:grid-cols-3">
-        <Card className="xl:col-span-2" title="Importer un fichier" subtitle="CSV — séparateur, encodage et formats détectés automatiquement">
+        <Card className="xl:col-span-2" title="Importer un fichier" subtitle="CSV, auto-détection séparateur et encodage">
           <UploadForm companyId={companyId} />
           <p className="muted text-xs mt-4">
             Formats reconnus : séparateurs <code>;</code> <code>,</code> tabulation <code>|</code> · montants
@@ -89,7 +89,7 @@ export default async function DataPage({
         </Card>
       </div>
 
-      <Card className="mt-5" title="Lots d'import" subtitle="Un lot annulé supprime exactement les écritures qu'il a créées">
+      <Card className="mt-5" title="Lots d'import" subtitle="Annulation sélective des écritures">
         {batches.length === 0 ? (
           <p className="muted text-sm">Aucun import pour le moment.</p>
         ) : (

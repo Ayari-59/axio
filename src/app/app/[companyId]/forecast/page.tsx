@@ -57,7 +57,7 @@ export default async function ForecastPage({
     <div>
       <PageHeader
         title="Prévisions"
-        description="Six méthodes sont évaluées par backtest sur votre historique ; la plus fiable est retenue, et vous pouvez en imposer une autre."
+        description="Six méthodes testées ; la plus fiable retenue, vous pouvez en choisir une autre."
       />
 
       <div className="flex flex-wrap gap-2 mb-4">
@@ -125,7 +125,7 @@ export default async function ForecastPage({
           </p>
         </Card>
 
-        <Card title="Fiabilité des méthodes" subtitle="Erreur absolue moyenne mesurée sur un échantillon de validation (MAPE)">
+        <Card title="Fiabilité des méthodes" subtitle="Erreur moyenne (MAPE) en backtest">
           <Table headers={["Méthode", "MAPE", "Statut"]}>
             {result.candidates.map((candidate) => (
               <tr key={candidate.method}>
@@ -144,9 +144,7 @@ export default async function ForecastPage({
             ))}
           </Table>
           <p className="muted text-xs mt-3">
-            Le backtest retire les dernières périodes de l&apos;historique, entraîne la méthode sur le reste et
-            compare la prévision à ce qui s&apos;est réellement produit. Sous 6 périodes, aucune méthode
-            n&apos;est départageable : le moteur retombe sur la dernière valeur connue et le signale.
+            Backtest : dernier historique retiré, prévision comparée aux données réelles. Moins de 6 périodes : retour à la dernière valeur.
           </p>
         </Card>
       </div>

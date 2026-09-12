@@ -1,0 +1,216 @@
+═══════════════════════════════════════════════════════════════════════════════
+  PLAN DE COMPTES FRANÇAIS STANDARD (PCG) - RÉFÉRENCE TIIME
+═══════════════════════════════════════════════════════════════════════════════
+
+Classe 1 : CAPITAUX PROPRES ET ENDETTEMENT FINANCIER
+─────────────────────────────────────────────────────
+1012  Capital social
+1013  Capital appelé non versé
+1015  Réserves
+1016  Écarts de réévaluation
+1017  Autres réserves
+1018  Résultats antérieurs
+1050  Provisions pour risques et charges
+1080  Résultat net de l'exercice
+
+Classe 2 : IMMOBILISATIONS
+──────────────────────────
+  2013  Bâtiments
+  2014  Constructions sur terrains d'autrui
+  2015  Installations générales, aménagements
+  2016  Agencements et installations
+  2018  Autres immobilisations corporelles
+
+  2031  Équipements
+  2032  Équipements de transport
+  2033  Équipements informatiques
+
+  2050  Brevets
+  2055  Licences
+  2060  Fonds de commerce
+
+  2801  Amortissements bâtiments
+  2815  Amortissements installations
+  2831  Amortissements équipements
+
+Classe 3 : STOCKS
+─────────────────
+  3100  Matières premières
+  3101  Matières consommables
+  3102  Fournitures
+  3300  Produits en cours
+  3500  Produits finis
+  3600  Marchandises
+
+Classe 4 : TIERS (Créances et dettes)
+─────────────────────────────────────
+  4010  Clients
+  4011  Clients - Factures à établir
+  4012  Clients - Avances à régulariser
+  4015  Clients - Dépôts et cautionnements
+
+  2010  Fournisseurs
+  2011  Fournisseurs - Factures non reçues
+  2015  Fournisseurs - Dépôts et cautionnements
+
+  4450  TVA (Synthétique)
+  4457  TVA collectée
+  4460  TVA sur acquisitions communautaires
+  4462  TVA sur factures non reçues
+  4466  TVA non déductible
+  4566  TVA déductible sur matières et fournitures
+  4562  TVA déductible sur immobilisations
+  4568  TVA déductible sur autres biens et services
+  4582  TVA déductible antérieure
+
+  4472  TVA à décaisser ou crédit de TVA
+  4703  Associés - Comptes courants
+  4706  Associés - Intérêts courus
+
+Classe 5 : TRÉSORERIE
+──────────────────────
+  1010  Caisse
+  1020  Compte bancaire
+  1025  Compte chèques postaux
+  1050  Placements court terme
+
+Classe 6 : CHARGES
+───────────────────
+  6010  Achats de matières premières
+  6020  Achats de matières consommables
+  6030  Loyer et charges
+  6031  Électricité/Gaz/Eau
+  6050  Frais bancaires
+  6060  Primes d'assurance
+  6070  Cadeaux clients
+  6100  Transports de biens vendus
+  6110  Transports de matériels et stocks
+
+  6200  Rémunérations du personnel
+  6210  Charges sociales patronales
+  6220  Cotisations obligatoires
+
+  6400  Fournitures et services externes
+  6410  Loyer équipements
+  6420  Entretien et réparations
+  6430  Nettoyage locaux
+
+  6500  Autres charges externes
+  6510  Études et consultations
+  6520  Documentation technique
+  6530  Frais de publicité et promotion
+
+  6600  Charges financières
+  6610  Intérêts emprunt
+  6620  Escomptes accordés
+
+  6700  Impôts et taxes
+  6710  Impôts directs
+  6720  Impôts indirects
+
+  6800  Charges exceptionnelles
+  6810  Charges exceptionnelles
+
+  6900  Dotations aux amortissements
+  6910  Dotations aux provisions
+  6920  Dotations aux dépréciations
+
+Classe 7 : PRODUITS (Revenus)
+───────────────────────────────
+  7010  Ventes de biens
+  7020  Ventes de services
+  7030  Prestations de services
+
+  7100  Locations immobilières
+  7110  Locations de matériel
+
+  7200  Revenus d'immeubles
+  7210  Revenus de placement financier
+
+  7400  Rabais, remises et ristournes
+  7410  Autres réductions commerciales
+
+  7500  Revenus exceptionnels
+  7510  Produits exceptionnels
+
+  7600  Intérêts reçus
+  7610  Revenus de placements
+  7620  Différences de change
+
+  7700  Reprises de provisions
+  7710  Reprises d'amortissements
+
+═══════════════════════════════════════════════════════════════════════════════
+COMPTES DE TVA FRANÇAIS - DÉTAIL
+═══════════════════════════════════════════════════════════════════════════════
+
+TVA COLLECTÉE (Classe 4)
+────────────────────────
+4457  TVA collectée
+      → Utilisé : Quand vous facturez un client
+      → Côté : Crédit (augmente la dette envers l'État)
+      → Taux : 20% (normal), 10% (réduit), 5,5% (super-réduit), 0% (exempte)
+
+TVA DÉDUCTIBLE (Classe 4)
+──────────────────────────
+4566  TVA déductible sur matières et fournitures
+      → Utilisé : Achat de matériel de production
+      → Côté : Crédit (réduit la dette envers l'État)
+
+4562  TVA déductible sur immobilisations
+      → Utilisé : Achat d'équipement/immeuble
+      → Côté : Crédit (réduit la dette envers l'État)
+
+4568  TVA déductible sur autres biens et services
+      → Utilisé : Achat de services, fournitures générales
+      → Côté : Crédit (réduit la dette envers l'État)
+
+TVA À DÉCAISSER (Classe 4)
+──────────────────────────
+4472  TVA à décaisser
+      → Solde = TVA collectée (4457) - TVA déductible (4566+4562)
+      → Si > 0 : Vous devez payer l'État
+      → Si < 0 : L'État vous doit un crédit (à reporter ou demander remboursement)
+
+═══════════════════════════════════════════════════════════════════════════════
+CHIFFRES CLÉS POUR TIIME
+═══════════════════════════════════════════════════════════════════════════════
+
+Exemple 1 : Achat de matériel 1 000 € HT avec TVA 20%
+─────────────────────────────────────────────────────
+Débit  2033 Équipements informatiques  : 1 000 €
+Crédit 4562 TVA déductible immobilisations : 200 €
+Crédit 2010 Fournisseurs            : 1 200 € (total TTC)
+
+Exemple 2 : Vente de service 500 € HT avec TVA 20%
+──────────────────────────────────────────────────
+Débit  4010 Clients                 : 600 € (total TTC)
+Crédit 7030 Prestations services    : 500 €
+Crédit 4457 TVA collectée           : 100 €
+
+Exemple 3 : Calcul TVA à décaisser mensuel
+──────────────────────────────────────────
+TVA collectée (4457)              : +100 €
+TVA déductible matières (4566)    : -80 €
+TVA déductible immobilisations (4562) : -20 €
+─────────────────────────────────
+TVA à décaisser (4472) fin mois   : = 0 €
+
+→ Si = 0, solde zéro (ni à payer ni à récupérer)
+→ Si > 0, vous versez à l'État
+→ Si < 0, l'État vous doit (crédit TVA)
+
+═══════════════════════════════════════════════════════════════════════════════
+CONSEILS TIIME
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Toujours vérifier la balance (débits = crédits)
+2. Classer les comptes par activité pour un pilotage facile
+3. Créer des comptes "analytiques" pour suivre par centre de coûts
+4. Paramétrer les taux TVA par type de transaction
+5. Rapprocher la banque tous les mois
+6. Exporter trimestrialement pour la déclaration TVA
+7. Conserver tous les justificatifs (factures, relevés, contrats)
+8. Archiver les clôtures annuelles
+
+═══════════════════════════════════════════════════════════════════════════════

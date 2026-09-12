@@ -1,0 +1,1 @@
+export { useGlossary } from "./useGlossary";
